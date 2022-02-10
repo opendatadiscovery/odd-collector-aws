@@ -3,7 +3,6 @@ import boto3
 from typing import Dict
 from typing import Any
 from typing import Iterable
-import logging
 from more_itertools import chunked, flatten
 
 from odd_models.models import DataEntity
@@ -18,9 +17,12 @@ from .mappers.columns import map_column_stats
 from .mappers.jobs import map_glue_job, map_glue_job_run
 from .mappers.tables import map_glue_table
 
+from itertools import chain
+
 SDK_DATASET_MAX_RESULTS = 1000
 SDK_DATASET_COL_STATS_MAX_RESULTS = 100
 SDK_DATA_TRANSFORMERS_MAX_RESULTS = 100
+
 
 class Adapter(AbstractAdapter):
     def __init__(self, config: GluePlugin) -> None:
@@ -46,9 +48,15 @@ class Adapter(AbstractAdapter):
         return flatten([self.__get_tables(dn) for dn in self.__get_database_names()])
 
     def get_data_entity_list(self) -> DataEntityList:
+        items = chain(
+            self.get_data_entities(),
+            self.get_transformers(),
+            self.get_transformers_runs(),
+        )
+
         return DataEntityList(
             data_source_oddrn=self.get_data_source_oddrn(),
-            items=list(self.get_data_entities()),
+            items=list(items),
         )
 
     def get_transformers(self) -> Iterable[DataEntity]:
