@@ -38,6 +38,14 @@ class SagemakerPlugin(Plugin):
     type: Literal["sagemaker_featurestore"]
 
 
+class RedshiftPlugin(Plugin):
+    type: Literal["redshift"]
+    host: Optional[str] = None
+    port: Optional[int] = None
+    database: Optional[str] = None
+    user: Optional[str] = None
+    password: Optional[str] = None
+
 AvailablePlugin = Annotated[
     Union[
         GluePlugin,
@@ -46,6 +54,7 @@ AvailablePlugin = Annotated[
         S3Plugin,
         QuicksightPlugin,
         SagemakerPlugin,
+        RedshiftPlugin,
     ],
     pydantic.Field(discriminator="type"),
 ]

@@ -2,6 +2,6 @@ default_pulling_interval: 10
 token: ""
 platform_host_url: "http://localhost:8080"
 plugins:
-  - type: glue
+  - type: redshift
     name: test_glue
-    aws_region: "eu-central-1"
+

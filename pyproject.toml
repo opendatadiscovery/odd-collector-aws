@@ -22,6 +22,7 @@ black = "^21.12b0"
 aiohttp = "^3.8.1"
 pyarrow = "^6.0.1"
 numpy = "^1.22.1"
+psycopg2-binary = "^2.9.3"
 
 
 [tool.poetry.dev-dependencies]
