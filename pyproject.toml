@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "odd-aws-collector"
+name = "odd-collector-aws"
 version = "0.1.1"
 description = "ODD Collector for AWS"
 license = "Apache-2.0"

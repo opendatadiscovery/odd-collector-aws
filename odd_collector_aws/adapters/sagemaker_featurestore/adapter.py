@@ -5,7 +5,7 @@ import pytz
 from odd_models.models import DataEntity, DataEntityType, DataSet, List
 from odd_models.models import DataEntityList
 
-from odd_aws_collector.domain.plugin import SagemakerPlugin
+from odd_collector_aws.domain.plugin import SagemakerPlugin
 from odd_collector_sdk.domain.adapter import AbstractAdapter
 
 from .mappers.datasets import DatasetMapper

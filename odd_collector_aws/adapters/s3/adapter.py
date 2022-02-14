@@ -8,8 +8,8 @@ from odd_models.models import DataEntityList
 from oddrn_generator.generators import S3Generator
 
 from odd_collector_sdk.domain.adapter import AbstractAdapter
-from odd_aws_collector.domain.plugin import S3Plugin
-from odd_aws_collector.domain.paginator_config import PaginatorConfig
+from odd_collector_aws.domain.plugin import S3Plugin
+from odd_collector_aws.domain.paginator_config import PaginatorConfig
 from .mapper.dataset import map_dataset
 from .schema.s3_parquet_schema_retriever import S3ParquetSchemaRetriever
 

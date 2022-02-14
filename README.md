@@ -1,1 +1,1 @@
-# odd-aws-collector
+# odd-collector-aws

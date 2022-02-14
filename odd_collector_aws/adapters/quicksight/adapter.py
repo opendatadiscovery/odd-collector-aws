@@ -2,8 +2,8 @@ import logging
 from typing import Dict, Any, Iterable, List
 from itertools import chain
 
-from odd_aws_collector.domain.plugin import QuicksightPlugin
-from odd_aws_collector.domain.paginator_config import PaginatorConfig
+from odd_collector_aws.domain.plugin import QuicksightPlugin
+from odd_collector_aws.domain.paginator_config import PaginatorConfig
 
 import boto3
 from more_itertools import flatten
