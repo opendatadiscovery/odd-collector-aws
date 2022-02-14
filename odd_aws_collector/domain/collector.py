@@ -32,7 +32,8 @@ class Collector:
         )
         self.adapters_with_plugins = adapter_initizlizator.init_adapters()
         self.__api = DataSourceApi(
-            http_client=HttpClient(), platform_url=self.config.platform_host_url
+            http_client=HttpClient(token=self.config.token),
+            platform_url=self.config.platform_host_url,
         )
 
     def start_polling(self):
