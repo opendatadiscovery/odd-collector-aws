@@ -6,7 +6,7 @@ from more_itertools import flatten
 from odd_models.models import DataEntity
 from odd_models.models import DataEntityList
 from oddrn_generator import AthenaGenerator
-from odd_aws_collector.domain.adapter import AbstractAdapter
+from odd_collector_sdk.domain.adapter import AbstractAdapter
 
 from odd_aws_collector.domain.plugin import AthenaPlugin
 from odd_aws_collector.domain.paginator_config import PaginatorConfig
@@ -82,7 +82,7 @@ class Adapter(AbstractAdapter):
         )
 
     def __get_table_metadata(
-            self, catalog_name: str, database_name: str
+        self, catalog_name: str, database_name: str
     ) -> Iterable[DataEntity]:
         raw_tables: Iterable[Dict[str, Any]] = self.__fetch_paginator(
             PaginatorConfig(
@@ -119,7 +119,7 @@ class Adapter(AbstractAdapter):
             token = sdk_response.resume_token
 
     def __process_table_raw_data(
-            self, raw_table_data: Dict[str, Any], catalog_name: str, database_name: str
+        self, raw_table_data: Dict[str, Any], catalog_name: str, database_name: str
     ) -> DataEntity:
         return map_athena_table(
             raw_table_data, catalog_name, database_name, self._oddrn_generator

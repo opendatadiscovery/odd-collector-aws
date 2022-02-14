@@ -2,49 +2,40 @@ from typing import List, Literal, Optional, Union
 import pydantic
 from typing_extensions import Annotated
 
+from odd_collector_sdk.domain.plugin import Plugin
 
-class Plugin(pydantic.BaseSettings):
-    name: str
-    description: Optional[str] = None
-    namespace: Optional[str] = None
+
+class AwsPlugin(Plugin):
     aws_secret_access_key: str
     aws_access_key_id: str
     aws_region: str
 
 
-class GluePlugin(Plugin):
+class GluePlugin(AwsPlugin):
     type: Literal["glue"]
 
 
-class DynamoDbPlugin(Plugin):
+class DynamoDbPlugin(AwsPlugin):
     type: Literal["dynamodb"]
     exclude_tables: Optional[List[str]] = []
 
 
-class AthenaPlugin(Plugin):
+class AthenaPlugin(AwsPlugin):
     type: Literal["athena"]
 
 
-class S3Plugin(Plugin):
+class S3Plugin(AwsPlugin):
     type: Literal["s3"]
     buckets: Optional[List[str]] = []
 
 
-class QuicksightPlugin(Plugin):
+class QuicksightPlugin(AwsPlugin):
     type: Literal["quicksight"]
 
 
-class SagemakerPlugin(Plugin):
+class SagemakerPlugin(AwsPlugin):
     type: Literal["sagemaker_featurestore"]
 
-
-class RedshiftPlugin(Plugin):
-    type: Literal["redshift"]
-    host: Optional[str] = None
-    port: Optional[int] = None
-    database: Optional[str] = None
-    user: Optional[str] = None
-    password: Optional[str] = None
 
 AvailablePlugin = Annotated[
     Union[
@@ -54,7 +45,6 @@ AvailablePlugin = Annotated[
         S3Plugin,
         QuicksightPlugin,
         SagemakerPlugin,
-        RedshiftPlugin,
     ],
     pydantic.Field(discriminator="type"),
 ]

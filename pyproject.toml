@@ -1,8 +1,11 @@
 [tool.poetry]
 name = "odd-aws-collector"
 version = "0.1.1"
-description = ""
-authors = ["Ramazan Yapparov <ryapparov@provectus.com>"]
+description = "ODD Collector for AWS"
+license = "Apache-2.0"
+authors = ["Open Data Discovery <pypi@opendatadiscovery.org>"]
+homepage = "https://github.com/opendatadiscovery/odd-collector-aws"
+repository = "https://github.com/opendatadiscovery/odd-collector-aws"
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -22,7 +25,7 @@ black = "^21.12b0"
 aiohttp = "^3.8.1"
 pyarrow = "^6.0.1"
 numpy = "^1.22.1"
-psycopg2-binary = "^2.9.3"
+odd-collector-sdk = "^0.1.1"
 
 
 [tool.poetry.dev-dependencies]

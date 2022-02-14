@@ -11,6 +11,7 @@ from odd_models.models import DataEntity
 from odd_models.models import DataEntityList
 
 from oddrn_generator import QuicksightGenerator
+from odd_collector_sdk.domain.adapter import AbstractAdapter
 
 from .mappers.datasets import map_quicksight_dataset
 from .mappers.dashboards import map_quicksight_dashboard
@@ -22,7 +23,7 @@ SDK_DATASET_COL_STATS_MAX_RESULTS = 100
 SDK_DATA_TRANSFORMERS_MAX_RESULTS = 100
 
 
-class Adapter:
+class Adapter(AbstractAdapter):
     def __init__(self, config: QuicksightPlugin) -> None:
         self._account_id = boto3.client(
             "sts",

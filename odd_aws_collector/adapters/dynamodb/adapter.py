@@ -11,7 +11,7 @@ from odd_models.models import (
 )
 from odd_models.models import DataEntityList
 from oddrn_generator import DynamodbGenerator
-from odd_aws_collector.domain.adapter import AbstractAdapter
+from odd_collector_sdk.domain.adapter import AbstractAdapter
 
 from odd_aws_collector.domain.plugin import DynamoDbPlugin
 from odd_aws_collector.domain.paginator_config import PaginatorConfig
@@ -84,7 +84,7 @@ class Adapter(AbstractAdapter):
             PaginatorConfig(
                 op_name="list_tables",
                 payload_key="TableNames",
-                page_size=SDK_DATASET_MAX_RESULTS
+                page_size=SDK_DATASET_MAX_RESULTS,
             )
         )
 
@@ -141,7 +141,7 @@ class Adapter(AbstractAdapter):
         )
 
     def __map_fields_from_attributes(
-            self, raw_attributes: List[Dict[str, Any]]
+        self, raw_attributes: List[Dict[str, Any]]
     ) -> Iterable[DataSetField]:
         return [self.__map_field_from_attribute(a) for a in raw_attributes]
 

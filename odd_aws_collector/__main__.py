@@ -1,10 +1,11 @@
 import asyncio
 import logging
-
-from .domain.adapters_folder_meta import AdapterFolderMetadata
-from .domain.collector import Collector
-
 from os import path
+
+
+from odd_collector_sdk.collector import Collector
+
+from odd_aws_collector.domain.plugin import AvailablePlugin
 
 logging.basicConfig(
     level=logging.INFO, format="[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
@@ -15,12 +16,9 @@ try:
 
     cur_dirname = path.dirname(path.realpath(__file__))
     config_path = path.join(cur_dirname, "../collector_config.yaml")
-    adapters_path = path.join(cur_dirname, "adapters")
-    adapters_folder_metadata: AdapterFolderMetadata = AdapterFolderMetadata(
-        adapters_path, "odd_aws_collector.adapters"
-    )
+    root_package = "odd_aws_collector.adapters"
 
-    collector = Collector(config_path, adapters_folder_metadata)
+    collector = Collector(config_path, root_package, AvailablePlugin)
 
     loop.run_until_complete(collector.register_data_sources())
 

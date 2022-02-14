@@ -9,7 +9,7 @@ from odd_models.models import DataEntity
 from odd_models.models import DataEntityList
 from oddrn_generator import GlueGenerator
 
-from odd_aws_collector.domain.adapter import AbstractAdapter
+from odd_collector_sdk.domain.adapter import AbstractAdapter
 from odd_aws_collector.domain.plugin import GluePlugin
 from odd_aws_collector.domain.paginator_config import PaginatorConfig
 
