@@ -64,7 +64,7 @@ AWS_SECRET_ACCESS_KEY=
 PLATFORM_HOST_URL=http://odd-platform:8080
 ```
 
-Custom `collector-config.yaml`x
+Custom `collector-config.yaml`
 ```yaml
 default_pulling_interval: 10
 token: ""
