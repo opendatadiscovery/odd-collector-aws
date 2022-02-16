@@ -1,3 +1,5 @@
+[![forthebadge](https://forthebadge.com/images/badges/built-with-love.svg)](https://forthebadge.com)
+[![forthebadge](https://forthebadge.com/images/badges/for-you.svg)](https://forthebadge.com)
 # odd-collector-aws
 Aggregation of AWS adapters for [ODD Platform](https://github.com/opendatadiscovery/odd-platform)
 

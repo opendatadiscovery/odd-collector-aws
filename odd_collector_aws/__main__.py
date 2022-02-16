@@ -4,7 +4,6 @@ from os import path
 
 
 from odd_collector_sdk.collector import Collector
-
 from odd_collector_aws.domain.plugin import AvailablePlugin
 
 logging.basicConfig(
