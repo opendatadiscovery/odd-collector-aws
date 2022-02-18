@@ -37,6 +37,7 @@ class Adapter(AbstractAdapter):
             aws_access_key_id=config.aws_access_key_id,
             aws_secret_access_key=config.aws_secret_access_key,
         ).get_caller_identity()["Account"]
+
         self._oddrn_generator = GlueGenerator(
             cloud_settings={"region": config.aws_region, "account": account_id}
         )
