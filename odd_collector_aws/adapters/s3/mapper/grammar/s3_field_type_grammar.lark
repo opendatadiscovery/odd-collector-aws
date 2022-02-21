@@ -28,6 +28,7 @@ SIMPLE_TYPE: "int8"i
         | "large_string"i
         | "large_utf8"i 
         | "decimal128"i
+        | "double"i
 
 varchar_type: "varchar"i ("(" NUMBER ")")*
 decimal_type: "decimal"i ("(" NUMBER "," NUMBER ")")*

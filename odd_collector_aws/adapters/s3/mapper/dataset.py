@@ -42,9 +42,8 @@ TYPE_MAP: Dict[str, Type] = {
     'list': Type.TYPE_LIST,
     'map': Type.TYPE_MAP,
     'struct': Type.TYPE_STRUCT,
-    'union': Type.TYPE_UNION
-    # lib.ListType: Type.TYPE_LIST,
-    # lib.StructType: Type.TYPE_STRUCT,
+    'union': Type.TYPE_UNION,
+    "double": Type.TYPE_NUMBER
 }
 field_type_transformer = S3FieldTypeTransformer()
 parser = Lark.open('grammar/s3_field_type_grammar.lark', rel_to=__file__, parser="lalr", start='type')
@@ -116,11 +115,19 @@ def map_column(oddrn_gen: S3Generator,
     )
     result.append(dsf)
 
-    if ds_type in ['list', 'struct', 'union']:
+    if ds_type in ['struct', 'union']:
         for children in type_parsed['children']:
             result.extend(map_column(oddrn_gen=oddrn_gen,
                                        parent_oddrn=dsf.oddrn,
                                        type_parsed=children))
+
+
+    if ds_type == 'list':
+        for children in type_parsed['children']:
+            result.extend(map_column(oddrn_gen=oddrn_gen,
+                                        parent_oddrn=dsf.oddrn,
+                                        type_parsed=children,
+                                        is_value=True))
 
     if ds_type == 'map':
         result.extend(map_column(
