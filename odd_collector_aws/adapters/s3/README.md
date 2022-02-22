@@ -16,7 +16,7 @@ Please note:
 - dataset should contain files in same format, in case of format incompatibilities or currapted files 
 warning will be trown with message like 
 ```
-[2022-02-18 11:05:52,615] WARNING in s3_parquet_schema_retriever: unable to pars dataset in odd-s3-adapter/ with csv format
+[2022-02-18 11:05:52,615] WARNING in s3_schema_retriever: unable to pars dataset in odd-s3-adapter/ with csv format
 ```
 - Datasets with gziped files will take much longer to retrieve info because of compression 
 

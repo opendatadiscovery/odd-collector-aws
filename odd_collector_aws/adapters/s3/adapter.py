@@ -10,7 +10,7 @@ from odd_models.models import DataEntity, DataEntityList
 from oddrn_generator.generators import S3Generator
 
 from .mapper.dataset import map_dataset
-from .schema.s3_parquet_schema_retriever import S3SchemaRetriever
+from .schema.s3_schema_retriever import S3SchemaRetriever
 
 
 class Adapter(AbstractAdapter):
@@ -44,17 +44,16 @@ class Adapter(AbstractAdapter):
             start = time.time()
             logging.info(f"Starting metadat fetch for {path}")
             self.__oddrn_generator.set_oddrn_paths(buckets=path.split("/")[0])
-            file_format = self.__schema_retriever.get_format(path)
-            if file_format:
-                schema = self.__schema_retriever.get_schema(path, file_format)
+            s3ds = self.__schema_retriever.build_s3ds(path)
+            if s3ds:
+                schema = s3ds.get_schema()
                 if schema:
-                    metadata = self.__schema_retriever.get_metadata(path, file_format)
-                    logging.info(
-                        f"finishing sucsessfull fetch for {path} during {time.time()-start} seconds"
-                    )
+                    metadata = s3ds.get_metadata()
+                    logging.info(f"finishing sucsessfull fetch for {path} during {time.time()-start} seconds")
                     yield map_dataset(
                         name=path,
                         schema=schema,
                         metadata=metadata,
                         oddrn_gen=self.__oddrn_generator,
+                        rows_number=s3ds.get_rows()
                     )

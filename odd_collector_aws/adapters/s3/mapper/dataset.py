@@ -52,12 +52,10 @@ def __parse(field_type: str) -> Dict[str, Any]:
     column_tree = parser.parse(field_type)
     return field_type_transformer.transform(column_tree)
 
-def map_dataset(name, schema: Schema, metadata: Dict, oddrn_gen: S3Generator) -> DataEntity:
+def map_dataset(name, schema: Schema, metadata: Dict, oddrn_gen: S3Generator, rows_number) -> DataEntity:
     name = ':'.join(name.split('/')[1:])
 
-    oddrn_gen.set_oddrn_paths(keys=name)
-    rows = metadata['Rows']
-    del metadata['Rows']
+    oddrn_gen.set_oddrn_paths(keys=name) 
     metadata = [{'schema_url': f'{SCHEMA_FILE_URL}#/definitions/S3DataSetExtension',
                 'metadata': metadata}]
     
@@ -67,12 +65,12 @@ def map_dataset(name, schema: Schema, metadata: Dict, oddrn_gen: S3Generator) ->
         name=name,
         oddrn=oddrn_gen.get_oddrn_by_path('keys', name),
         metadata=metadata,
-        # TODO
+        # TODO for updated_at and Created_at we need first and last files mod date from s3, arrow file info shows only size  
         updated_at=None,
         created_at=None,
         type=DataEntityType.FILE,
         dataset=DataSet(
-            rows_number=rows,
+            rows_number=rows_number,
             field_list=columns
         )
     )
