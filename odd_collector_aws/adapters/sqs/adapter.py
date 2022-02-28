@@ -2,6 +2,7 @@ import boto3
 from botocore.exceptions import ClientError
 from .sqs_generator import SqsGenerator
 from odd_models.models import DataEntityList, DataEntity, DataEntityType
+from odd_collector_sdk.domain.adapter import AbstractAdapter
 from typing import Any, Dict, List
 from odd_collector_aws.domain.plugin import SQSPlugin
 import datetime
@@ -10,7 +11,7 @@ SCHEMA_FILE_URL="https://raw.githubusercontent.com/opendatadiscovery/opendatadis
                 "main/specification/extensions/sqs.json"
 
 
-class SqsAdapter:
+class Adapter(AbstractAdapter):
     def __init__(self, config: SQSPlugin) -> None:
         self._account_id = boto3.client("sts",
                                         aws_access_key_id=config.aws_access_key_id,
