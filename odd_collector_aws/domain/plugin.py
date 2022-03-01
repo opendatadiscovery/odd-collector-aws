@@ -26,7 +26,7 @@ class AthenaPlugin(AwsPlugin):
 
 class S3Plugin(AwsPlugin):
     type: Literal["s3"]
-    buckets: Optional[List[str]] = []
+    paths: Optional[List[str]] = []
 
 
 class QuicksightPlugin(AwsPlugin):
