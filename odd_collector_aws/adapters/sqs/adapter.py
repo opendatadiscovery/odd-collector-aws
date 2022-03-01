@@ -53,9 +53,10 @@ class Adapter(AbstractAdapter):
                     DataEntity(
                         name = queue_name,
                         oddrn=self.__oddrn_generator.get_oddrn_by_path('queue', queue_name),
-                        type=DataEntityType.UNKNOWN,
-                        created_at=created_at,
-                        updated_at=updated_at,
+                        type=DataEntityType.KAFKA_TOPIC,
+                        #TODO add time
+                        created_at=None,
+                        updated_at=None,
                         metadata=metadata
                     )
                 )
