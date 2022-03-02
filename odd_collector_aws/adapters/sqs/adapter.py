@@ -6,6 +6,7 @@ from odd_collector_sdk.domain.adapter import AbstractAdapter
 from typing import Any, Dict, List
 from odd_collector_aws.domain.plugin import SQSPlugin
 import datetime
+import pytz
 
 SCHEMA_FILE_URL="https://raw.githubusercontent.com/opendatadiscovery/opendatadiscovery-specification/" \
                 "main/specification/extensions/sqs.json"
@@ -41,8 +42,8 @@ class Adapter(AbstractAdapter):
             for queue in self._sqs_client.list_queues()['QueueUrls']:
                 queue_name = queue.split('/')[-1]
                 queue_attributes = self._sqs_client.get_queue_attributes(QueueUrl=queue, AttributeNames=['All'])['Attributes']
-                created_at=datetime.datetime.fromtimestamp(int(queue_attributes['CreatedTimestamp']))
-                updated_at=datetime.datetime.fromtimestamp(int(queue_attributes['LastModifiedTimestamp']))
+                created_at=datetime.datetime.fromtimestamp(int(queue_attributes['CreatedTimestamp']),tz=pytz.utc)
+                updated_at=datetime.datetime.fromtimestamp(int(queue_attributes['LastModifiedTimestamp']),tz=pytz.utc)
                 del queue_attributes['CreatedTimestamp']
                 del queue_attributes['LastModifiedTimestamp']
                 del queue_attributes['Policy']
@@ -54,9 +55,8 @@ class Adapter(AbstractAdapter):
                         name = queue_name,
                         oddrn=self.__oddrn_generator.get_oddrn_by_path('queue', queue_name),
                         type=DataEntityType.KAFKA_TOPIC,
-                        #TODO add time
-                        created_at=None,
-                        updated_at=None,
+                        created_at=created_at,
+                        updated_at=updated_at,
                         metadata=metadata
                     )
                 )
