@@ -20,36 +20,64 @@ Due to Plugin is inherited from `pydantic.BaseSetting`, each field missed in `co
 ## Implemented adapters
 ___
 ### __Athena__
-```python
-class AthenaPlugin(AwsPlugin):
-    type: Literal["athena"]
+```yaml
+    type: athena
+    aws_secret_access_key: str
+    aws_access_key_id: str
+    aws_region: str
 ```
 ### __DynamoDB__
-```python
-class DynamoDbPlugin(AwsPlugin):
-    type: Literal["dynamodb"]
-    exclude_tables: Optional[List[str]] = []
+```yaml
+    type: dynamodb
+    exclude_tables: str[]
+    aws_secret_access_key: str
+    aws_access_key_id: str
+    aws_region: str[]
 ```
 ### __Glue__
-```python
-class GluePlugin(AwsPlugin):
-    type: Literal["glue"]
+```yaml
+    type: glue
+    aws_secret_access_key: str
+    aws_access_key_id: str
+    aws_region: str
 ```
 ### __Quicksight__
-```python
-class QuicksightPlugin(AwsPlugin):
-    type: Literal["quicksight"]
+```yaml
+    type: quicksight
+    aws_secret_access_key: str
+    aws_access_key_id: str
+    aws_region: str
 ```
 ### __S3__
-```python
-class S3Plugin(AwsPlugin):
-    type: Literal["s3"]
-    buckets: Optional[List[str]] = []
+```yaml
+    type: s3
+    paths: str[]
+    aws_secret_access_key: str
+    aws_access_key_id: str
+    aws_region: str
 ```
 ### __Sagemaker__
-```python
-class SagemakerPlugin(AwsPlugin):
-    type: Literal["sagemaker_featurestore"]
+```yaml
+    type: sagemaker_featurestore
+    aws_secret_access_key: str
+    aws_access_key_id: str
+    aws_region: str
+```
+
+### __Quicksight__
+```yaml
+    type: quicksight
+    aws_secret_access_key: str
+    aws_access_key_id: str
+    aws_region: str
+```
+
+### __SQS__
+```yaml
+    type: sqs
+    aws_secret_access_key: str
+    aws_access_key_id: str
+    aws_region: str
 ```
 
 ## Building

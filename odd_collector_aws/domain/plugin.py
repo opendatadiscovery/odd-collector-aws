@@ -23,8 +23,10 @@ class DynamoDbPlugin(AwsPlugin):
 class AthenaPlugin(AwsPlugin):
     type: Literal["athena"]
 
+
 class SQSPlugin(AwsPlugin):
     type: Literal["sqs"]
+
 
 class S3Plugin(AwsPlugin):
     type: Literal["s3"]
