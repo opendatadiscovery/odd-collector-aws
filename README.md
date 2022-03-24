@@ -21,63 +21,63 @@ Due to Plugin is inherited from `pydantic.BaseSetting`, each field missed in `co
 ___
 ### __Athena__
 ```yaml
-    type: athena
-    aws_secret_access_key: str
-    aws_access_key_id: str
-    aws_region: str
+type: athena
+aws_secret_access_key: str
+aws_access_key_id: str
+aws_region: str
 ```
 ### __DynamoDB__
 ```yaml
-    type: dynamodb
-    exclude_tables: str[]
-    aws_secret_access_key: str
-    aws_access_key_id: str
-    aws_region: str[]
+type: dynamodb
+exclude_tables: str[]
+aws_secret_access_key: str
+aws_access_key_id: str
+aws_region: str[]
 ```
 ### __Glue__
 ```yaml
-    type: glue
-    aws_secret_access_key: str
-    aws_access_key_id: str
-    aws_region: str
+type: glue
+aws_secret_access_key: str
+aws_access_key_id: str
+aws_region: str
 ```
 ### __Quicksight__
 ```yaml
-    type: quicksight
-    aws_secret_access_key: str
-    aws_access_key_id: str
-    aws_region: str
+type: quicksight
+aws_secret_access_key: str
+aws_access_key_id: str
+aws_region: str
 ```
 ### __S3__
 ```yaml
-    type: s3
-    paths: str[]
-    aws_secret_access_key: str
-    aws_access_key_id: str
-    aws_region: str
+type: s3
+paths: str[]
+aws_secret_access_key: str
+aws_access_key_id: str
+aws_region: str
 ```
 ### __Sagemaker__
 ```yaml
-    type: sagemaker_featurestore
-    aws_secret_access_key: str
-    aws_access_key_id: str
-    aws_region: str
+type: sagemaker_featurestore
+aws_secret_access_key: str
+aws_access_key_id: str
+aws_region: str
 ```
 
 ### __Quicksight__
 ```yaml
-    type: quicksight
-    aws_secret_access_key: str
-    aws_access_key_id: str
-    aws_region: str
+type: quicksight
+aws_secret_access_key: str
+aws_access_key_id: str
+aws_region: str
 ```
 
 ### __SQS__
 ```yaml
-    type: sqs
-    aws_secret_access_key: str
-    aws_access_key_id: str
-    aws_region: str
+type: sqs
+aws_secret_access_key: str
+aws_access_key_id: str
+aws_region: str
 ```
 
 ## Building
