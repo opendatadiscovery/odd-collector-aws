@@ -1,11 +1,7 @@
 [![forthebadge](https://forthebadge.com/images/badges/built-with-love.svg)](https://forthebadge.com)
 [![forthebadge](https://forthebadge.com/images/badges/for-you.svg)](https://forthebadge.com)
 # odd-collector-aws
-Aggregation of AWS adapters for [ODD Platform](https://github.com/opendatadiscovery/odd-platform)
-
-`odd-collector-aws` uses [odd-collector-sdk](https://github.com/opendatadiscovery/odd-collector-sdk).
-
-
+ODD Collector is a lightweight service which gathers metadata from all your data sources.
 ## Domain
 ___
 Main class for AWS plugins is `AwsPlugin` inherited from `odd-collector-sdk.domain.Plugin`. 
@@ -15,7 +11,7 @@ class AwsPlugin(Plugin):
     aws_access_key_id: str
     aws_region: str
 ```
-Due to Plugin is inherited from `pydantic.BaseSetting`, each field missed in `collector-config.yaml` can be taken from env variables.
+Due to the Plugin is inherited from `pydantic.BaseSetting`, each field missed in `collector-config.yaml` can be taken from env variables.
 
 ## Implemented adapters
 ___
@@ -59,14 +55,6 @@ aws_region: str
 ### __Sagemaker__
 ```yaml
 type: sagemaker_featurestore
-aws_secret_access_key: str
-aws_access_key_id: str
-aws_region: str
-```
-
-### __Quicksight__
-```yaml
-type: quicksight
 aws_secret_access_key: str
 aws_access_key_id: str
 aws_region: str
