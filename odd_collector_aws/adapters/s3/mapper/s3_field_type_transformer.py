@@ -1,12 +1,14 @@
+import logging
+
 from lark import Transformer, Token
 
 
 class S3FieldTypeTransformer(Transformer):
-    def field_definition(self, items):       
+    def field_definition(self, items):
         return items[1] | {'field_name': str(items[0])}
 
     def struct_type(self, items):
-        print(items)
+        logging.info(items)
         return {
             'type': 'struct',
             'children': items
@@ -26,7 +28,7 @@ class S3FieldTypeTransformer(Transformer):
             'type': 'varchar',
             'logical_type': f"varchar({items[0]})"
         }
-    
+
     def decimal_type(self, items):
         if not len(items):
             return {'type': "decimal"}
@@ -54,9 +56,8 @@ class S3FieldTypeTransformer(Transformer):
             'type': 'union',
             'children': items
         }
-    
+
     def list_type(self, items):
-        # print('list:' , items)
         return {
             'type': 'list',
             'children': items

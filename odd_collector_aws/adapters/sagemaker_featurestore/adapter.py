@@ -5,7 +5,7 @@ import pytz
 from odd_models.models import DataEntity, DataEntityType, DataSet, List
 from odd_models.models import DataEntityList
 
-from odd_collector_aws.domain.plugin import SagemakerPlugin
+from odd_collector_aws.domain.plugin import SagemakerFeaturestorePlugin
 from odd_collector_sdk.domain.adapter import AbstractAdapter
 
 from .mappers.datasets import DatasetMapper
@@ -14,7 +14,7 @@ from .mappers.oddrn import ODDRN_BASE
 
 
 class Adapter(AbstractAdapter):
-    def __init__(self, config: SagemakerPlugin) -> None:
+    def __init__(self, config: SagemakerFeaturestorePlugin) -> None:
         self.__sagemaker_client = boto3.client(
             "sagemaker",
             aws_access_key_id=config.aws_access_key_id,

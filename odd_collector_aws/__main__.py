@@ -2,8 +2,8 @@ import asyncio
 import logging
 from os import path
 
-
 from odd_collector_sdk.collector import Collector
+
 from odd_collector_aws.domain.plugin import AvailablePlugin
 
 logging.basicConfig(
@@ -19,7 +19,7 @@ try:
 
     collector = Collector(config_path, root_package, AvailablePlugin)
 
-    loop.run_until_complete(collector.register_data_sources())
+    # loop.run_until_complete(collector.register_data_sources())
 
     collector.start_polling()
 
