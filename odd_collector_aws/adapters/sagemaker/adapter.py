@@ -28,7 +28,6 @@ class Adapter(AbstractAdapter):
         return self.__oddrn_generator.get_data_source_oddrn()
 
     def get_data_entity_list(self):
-        # //sagemaker/cloud/aws/account/311638508164/region/us-east-1
         base_oddrn = self.get_data_source_oddrn()
         experiments = self.client.get_experiments(self.config.experiments)
 

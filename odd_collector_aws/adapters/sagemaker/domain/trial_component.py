@@ -1,10 +1,10 @@
 from datetime import datetime
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Union
 
-import flatdict
 from odd_models.models import DataEntity, DataEntityType, DataTransformer, MetadataExtension
 from pydantic import validator
 
+from odd_collector_aws.utils import flatdict
 from .artifact import Artifact
 from .base_object import BaseObject, ToDataEntity
 from .source import Source
@@ -31,6 +31,20 @@ class MetadataProperties(BaseObject):
 class Parameter(BaseObject):
     number_value: Optional[float]
     string_value: Optional[str]
+
+    @property
+    def value(self):
+        return self.number_value \
+            if self.number_value is not None \
+            else self.string_value
+
+    @classmethod
+    def parse_name(cls, name: str):
+        if name.startswith('SageMaker.'):
+            xs = name.split('.')
+            name = '.'.join(xs[1:len(xs)])
+
+        return f"{name}"
 
 
 class Metric(BaseObject):
@@ -74,6 +88,8 @@ class TrialComponent(BaseObject, ToDataEntity):
     ) -> DataEntity:
         return DataEntity(
             oddrn=oddrn,
+            created_at=self.creation_time,
+            updated_at=self.last_modified_time,
             name=self.trial_component_name,
             type=DataEntityType.JOB,
             metadata=self.__extract_metadata(),
@@ -83,15 +99,12 @@ class TrialComponent(BaseObject, ToDataEntity):
             ),
         )
 
-    def __get_parameters_dict(self):
-        res = {}
-        for name, parameter in self.parameters.items():
-            name = f'Parameter.{name}'
-            if parameter.number_value is not None:
-                res[name] = parameter.number_value
-            else:
-                res[name] = parameter.string_value
-        return res
+    def __get_parameters_dict(self) -> Dict[str, Union[str, float]]:
+        return {
+            Parameter.parse_name(name): parameter.value
+            for name, parameter
+            in self.parameters.items()
+        }
 
     def __get_metrics(self):
         res = dict()
@@ -105,14 +118,12 @@ class TrialComponent(BaseObject, ToDataEntity):
     def __extract_metadata(self):
         schema = 'https://raw.githubusercontent.com/opendatadiscovery/opendatadiscovery-specification/main/specification/extensions/sagemaker.json#/definitions/TrialComponent'
 
-        m = {
-            'CreatedBy': flatdict.FlatDict(self.created_by),
-            'CreationTime': self.creation_time,
-            'Source': flatdict.FlatDict(self.source),
-            **self.__get_parameters_dict()
+        meta = {
+            **flatdict(self.source),
+            **flatdict(self.__get_parameters_dict())
         }
 
         if self.metrics:
-            m.update(self.__get_metrics())
+            meta.update(self.__get_metrics())
 
-        return [MetadataExtension(schema_url=schema, metadata=flatdict.FlatDict(m))]
+        return [MetadataExtension(schema_url=schema, metadata=flatdict(meta))]
