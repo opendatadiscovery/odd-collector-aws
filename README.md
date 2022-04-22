@@ -2,6 +2,8 @@
 [![forthebadge](https://forthebadge.com/images/badges/for-you.svg)](https://forthebadge.com)
 # odd-collector-aws
 ODD Collector is a lightweight service which gathers metadata from all your data sources.
+
+To learn more about collector types and ODD Platform's architecture, [read the documentation](https://docs.opendatadiscovery.org/architecture).
 ## Domain
 ___
 Main class for AWS plugins is `AwsPlugin` inherited from `odd-collector-sdk.domain.Plugin`. 
