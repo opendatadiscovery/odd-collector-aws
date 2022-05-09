@@ -13,7 +13,7 @@ from ..domain.trial_component import TrialComponent
 
 class SagemakerClient(Client):
     def __init__(
-            self, aws_access_key_id: str, aws_secret_access_key: str, region_name: str
+        self, aws_access_key_id: str, aws_secret_access_key: str, region_name: str
     ):
         super().__init__()
         boto3.setup_default_session(
@@ -31,13 +31,13 @@ class SagemakerClient(Client):
 
     def __get_search_expression(self, experiments_name: Optional[List[str]]):
         if experiments_name:
-            return {'SearchExpression':
-                {'Filters':
-                    [
+            return {
+                "SearchExpression": {
+                    "Filters": [
                         {
-                            'Name': 'ExperimentName',
-                            'Operator': 'In',
-                            'Value': ','.join(experiments_name)
+                            "Name": "ExperimentName",
+                            "Operator": "In",
+                            "Value": ",".join(experiments_name),
                         }
                     ]
                 }
@@ -45,18 +45,20 @@ class SagemakerClient(Client):
 
         return {}
 
-    def get_experiments(self, experiments_name: Optional[List[str]]) -> Generator[Experiment, Any, Any]:
+    def get_experiments(
+        self, experiments_name: Optional[List[str]]
+    ) -> Generator[Experiment, Any, Any]:
         search_expression = self.__get_search_expression(experiments_name)
 
         pconf = PaginatorConfig(
             op_name="search",
             parameters={},
             list_fetch_key="Results",
-            kwargs={'Resource': 'Experiment', **search_expression}
+            kwargs={"Resource": "Experiment", **search_expression},
         )
 
         for experiment in self.__fetch(pconf):
-            experiment = experiment.get('Experiment')
+            experiment = experiment.get("Experiment")
             trials = self.__get_trials(experiment.get("ExperimentName"))
 
             yield Experiment.parse_obj({**experiment, "Trials": trials})
@@ -66,7 +68,7 @@ class SagemakerClient(Client):
             op_name="list_trials",
             parameters={},
             list_fetch_key="TrialSummaries",
-            kwargs={'ExperimentName': experiment_name}
+            kwargs={"ExperimentName": experiment_name},
         )
 
         for res in self.__fetch(pconf):
@@ -74,46 +76,57 @@ class SagemakerClient(Client):
 
             yield Trial.parse_obj({**res, "TrialComponents": trial_components})
 
-    def __get_trial_component_description(self, trial_component_name: str) -> TrialComponent:
+    def __get_trial_component_description(
+        self, trial_component_name: str
+    ) -> TrialComponent:
         description = self.client.describe_trial_component(
             TrialComponentName=trial_component_name
         )
 
-        inputs = description.get('InputArtifacts')
-        outputs = description.get('OutputArtifacts')
+        inputs = description.get("InputArtifacts")
+        outputs = description.get("OutputArtifacts")
 
-        input_artifacts = [self.__to_artifact(name, data) for name, data in inputs.items()]
-        output_artifacts = [self.__to_artifact(name, data) for name, data in outputs.items()]
+        input_artifacts = [
+            self.__to_artifact(name, data) for name, data in inputs.items()
+        ]
+        output_artifacts = [
+            self.__to_artifact(name, data) for name, data in outputs.items()
+        ]
 
         return TrialComponent.parse_obj(
-            {**description, 'InputArtifacts': input_artifacts, 'OutputArtifacts': output_artifacts})
+            {
+                **description,
+                "InputArtifacts": input_artifacts,
+                "OutputArtifacts": output_artifacts,
+            }
+        )
 
     def __get_trial_components(self, trial_name: str):
         pconf = PaginatorConfig(
             op_name="list_trial_components",
             parameters={},
             list_fetch_key="TrialComponentSummaries",
-            kwargs={'TrialName': trial_name}
+            kwargs={"TrialName": trial_name},
         )
 
         for res in self.__fetch(pconf):
             yield self.__get_trial_component_description(res.get("TrialComponentName"))
 
     def __to_artifact(self, name, data) -> Artifact:
-        uri = data.get('Value')
-        media_type = data.get('MediaType')
+        uri = data.get("Value")
+        media_type = data.get("MediaType")
 
-        if name == 'SageMaker.ImageUri':
+        if name == "SageMaker.ImageUri":
             return create_artifact(name=name, uri=uri)
-        else:
-            res = self.client.list_artifacts(SourceUri=uri).get('ArtifactSummaries')
-            head = safe_list_get(res, 0)
-            return create_artifact(
-                name=name,
-                uri=uri,
-                media_type=media_type,
-                arn=head.get('ArtifactArn') if head else None,
-            )
+
+        res = self.client.list_artifacts(SourceUri=uri).get("ArtifactSummaries")
+        head = safe_list_get(res, 0)
+        return create_artifact(
+            name=name,
+            uri=uri,
+            media_type=media_type,
+            arn=head.get("ArtifactArn") if head else None,
+        )
 
     def __fetch(self, conf: PaginatorConfig):
         paginator = self.client.get_paginator(conf.op_name)

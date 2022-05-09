@@ -1,9 +1,8 @@
 import itertools
-from typing import List
 
 from odd_collector_sdk.domain.adapter import AbstractAdapter
-from odd_models.models import DataEntity, DataEntityList
-from oddrn_generator.generators import SageMakerGenerator
+from odd_models.models import DataEntityList
+from oddrn_generator.generators import SagemakerGenerator
 
 from odd_collector_aws.domain.plugin import SagemakerPlugin
 from .client.sagemaker_client import SagemakerClient
@@ -20,8 +19,11 @@ class Adapter(AbstractAdapter):
             region_name=config.aws_region,
         )
 
-        self.__oddrn_generator = SageMakerGenerator(
-            cloud_settings={"region": config.aws_region, "account": self.client.account_id}
+        self.__oddrn_generator = SagemakerGenerator(
+            cloud_settings={
+                "region": config.aws_region,
+                "account": self.client.account_id,
+            }
         )
 
     def get_data_source_oddrn(self) -> str:
@@ -29,9 +31,9 @@ class Adapter(AbstractAdapter):
 
     def get_data_entity_list(self):
         base_oddrn = self.get_data_source_oddrn()
+        print(base_oddrn)
         experiments = self.client.get_experiments(self.config.experiments)
 
-        data_entities = (map_experiment(i, base_oddrn) for i in experiments)
-        flatten: List[DataEntity] = list(itertools.chain(*data_entities))
-        de_list = DataEntityList(data_source_oddrn=base_oddrn, items=flatten)
-        return de_list
+        data_entities = (map_experiment(i, self.__oddrn_generator) for i in experiments)
+
+        return DataEntityList(data_source_oddrn=base_oddrn, items=list(itertools.chain(*data_entities)))
