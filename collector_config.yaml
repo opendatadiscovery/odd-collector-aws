@@ -1,5 +1,4 @@
 default_pulling_interval: 10
-provider_oddrn: collector
 token: ""
 platform_host_url: "http://localhost:8080"
 plugins:
