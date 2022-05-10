@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "odd-collector-aws"
-version = "0.1.1"
+version = "0.1.2"
 description = "ODD Collector for AWS"
 license = "Apache-2.0"
 authors = ["Open Data Discovery <pypi@opendatadiscovery.org>"]
@@ -9,23 +9,21 @@ repository = "https://github.com/opendatadiscovery/odd-collector-aws"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-flask = "^2.0.1"
-python-dotenv = "^0.19.0"
-gunicorn = "^20.1.0"
-boto3 = "^1.18.44"
-pyhumps = "^3.0.2"
-more-itertools = "^8.10.0"
-lark-parser = "^0.12.0"
-APScheduler = "^3.8.1"
-humps = "^0.2.2"
 oddrn-generator = "^0.1.28"
-pydantic = "^1.8.2"
-black = "^21.12b0"
-aiohttp = "^3.8.1"
+python-dotenv = "^0.19.0"
+boto3 = "^1.18.44"
+lark-parser = "^0.12.0"
+pyhumps = "^3.0.2"
 pyarrow = "^6.0.1"
 numpy = "^1.22.1"
-odd-collector-sdk = "^0.1.5"
+humps = "^0.2.2"
 flatdict = "^4.0.1"
+more-itertools = "^8.10.0"
+odd-collector-sdk = "0.2.1"
+
+[tool.black]
+target-version = ['py39']
+preview = true
 
 
 [tool.poetry.dev-dependencies]

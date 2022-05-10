@@ -9,5 +9,7 @@ class Client(ABC):
         pass
 
     @abstractmethod
-    def get_experiments(self, experiments_name: Optional[str]) -> Generator[Experiment, Any, Any]:
+    def get_experiments(
+        self, experiments_name: Optional[str]
+    ) -> Generator[Experiment, Any, Any]:
         raise NotImplementedError

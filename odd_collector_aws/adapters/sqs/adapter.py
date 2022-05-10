@@ -60,7 +60,9 @@ class Adapter(AbstractAdapter):
                 queue_attributes["AccountID"] = self._account_id
                 metadata = [
                     {
-                        "schema_url": f"{SCHEMA_FILE_URL}#/definitions/SQSDataSetExtension",
+                        "schema_url": (
+                            f"{SCHEMA_FILE_URL}#/definitions/SQSDataSetExtension"
+                        ),
                         "metadata": queue_attributes,
                     }
                 ]

@@ -56,7 +56,17 @@ aws_secret_access_key: str
 aws_access_key_id: str
 aws_region: str
 ```
+
 ### __Sagemaker__
+```yaml
+type: sagemaker
+experiments: str[]
+aws_secret_access_key: str
+aws_access_key_id: str
+aws_region: str
+```
+
+### __Sagemaker Featurestore__
 ```yaml
 type: sagemaker_featurestore
 aws_secret_access_key: str
@@ -105,7 +115,7 @@ plugins:
     name: test_glue_adapter
   - type: s3
     name: test_s3_adapter
-    buckets: ['some_bucket_name']
+    paths: ['some_bucket_name']
 ```
 
 docker-compose.yaml

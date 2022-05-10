@@ -31,9 +31,9 @@ class Adapter(AbstractAdapter):
 
     def get_data_entity_list(self):
         base_oddrn = self.get_data_source_oddrn()
-        print(base_oddrn)
         experiments = self.client.get_experiments(self.config.experiments)
-
         data_entities = (map_experiment(i, self.__oddrn_generator) for i in experiments)
 
-        return DataEntityList(data_source_oddrn=base_oddrn, items=list(itertools.chain(*data_entities)))
+        return DataEntityList(
+            data_source_oddrn=base_oddrn, items=list(itertools.chain(*data_entities))
+        )

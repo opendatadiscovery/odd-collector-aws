@@ -1,30 +1,36 @@
 from functools import partial
 from typing import List, Dict, Type
+from xmlrpc.client import Boolean
 
 from odd_models.models import DataEntity, DataEntityType
 from oddrn_generator.generators import SagemakerGenerator
+
+from odd_collector_aws.adapters.sagemaker.domain.trial_component import TrialComponent
 
 from .domain.artifact import Artifact
 from .domain.experiment import Experiment
 from .domain.trial import Trial
 
 
-class ArtifactsDataEntitiesCache:
-    def __init__(self):
-        self.items: Dict[
-            str,
-        ] = {}
+class ArtifactsDataEntitiesCache(object):
+    """Cache for artifacts  (Models, Datasets, ...)
 
-    def upsert(self, data_entity: DataEntity) -> DataEntity:
-        oddrn = data_entity.oddrn
+    Some jobs can be linked with same artifacts.
+    Store them and return if exists
+    """
+
+    def __init__(self):
+        self.items: Dict[str,] = {}
+
+    def upsert(self, artifact, oddrn) -> DataEntity:
         if oddrn not in self.items:
-            self.items[oddrn] = data_entity
+            self.items[oddrn] = artifact.to_data_entity(oddrn)
 
         return self.items[oddrn]
 
 
-def _get_last(str: str, delimeter: str = "/") -> str:
-    return str.split(delimeter)[-1]
+def _get_name(name, delimeter: str = "/") -> str:
+    return name.split(delimeter)[-1]
 
 
 def map_artifacts(
@@ -32,16 +38,15 @@ def map_artifacts(
     cache: ArtifactsDataEntitiesCache,
     oddrn_gen: Type[SagemakerGenerator],
 ) -> List[DataEntity]:
-    items: List[DataEntity] = []
+    data_entities: List[DataEntity] = []
 
     for artifact in artifacts:
-        name = _get_last(artifact.arn) if artifact.arn else _get_last(artifact.uri)
-        oddrn_gen.set_oddrn_paths(artifacts=name)
+        name = _get_name(artifact.arn or artifact.uri)
+        oddrn = oddrn_gen.get_oddrn_by_path("artifacts", new_value=name)
 
-        de = artifact.to_data_entity(oddrn=oddrn_gen.get_oddrn_by_path("artifacts"))
-        items.append(cache.upsert(de))
+        data_entities.append(cache.upsert(artifact, oddrn))
 
-    return items
+    return data_entities
 
 
 def map_inputs(
@@ -49,7 +54,6 @@ def map_inputs(
     cache: ArtifactsDataEntitiesCache,
     oddrn_gen: Type[SagemakerGenerator],
 ) -> List[DataEntity]:
-    trial_oddrn = oddrn_gen.get_oddrn_by_path("trials")
     output_oddrn = oddrn_gen.get_oddrn_by_path("jobs")
     data_entities = map_artifacts(artifacts, cache, oddrn_gen)
 
@@ -77,6 +81,31 @@ def map_outputs(
     return data_entities
 
 
+def map_trial_component(
+    trial_component: TrialComponent,
+    oddrn_gen: SagemakerGenerator,
+    artifacts_cache: ArtifactsDataEntitiesCache,
+) -> List[DataEntity]:
+    name = trial_component.trial_component_name
+    inputs = trial_component.input_artifacts
+    outputs = trial_component.output_artifacts
+
+    oddrn = oddrn_gen.get_oddrn_by_path("jobs", new_value=name)
+    data_entity = trial_component.to_data_entity(oddrn)
+
+    inputs_data_entities = map_inputs(inputs, artifacts_cache, oddrn_gen)
+    outputs_data_entities = map_outputs(outputs, artifacts_cache, oddrn_gen)
+
+    inputs_oddrn = [i.oddrn for i in inputs_data_entities]
+    outputs_oddrn = [o.oddrn for o in outputs_data_entities]
+
+    # Add links to upstream/downstream
+    data_entity.data_transformer.inputs.extend(inputs_oddrn)
+    data_entity.data_transformer.outputs.extend(outputs_oddrn)
+
+    return [data_entity, *inputs_data_entities, *outputs_data_entities]
+
+
 def map_trial(
     trial: Trial,
     *,
@@ -87,7 +116,6 @@ def map_trial(
 
     # Set oddrn generator for TRIAL
     oddrn_gen.set_oddrn_paths(trials=trial.trial_name)
-    trial_oddrn = oddrn_gen.get_oddrn_by_path("trials")
 
     # Transform to DataEntity
     trial_de = trial.to_data_entity(oddrn_gen=oddrn_gen)
@@ -95,28 +123,13 @@ def map_trial(
 
     uniq_trial_components_oddrn = set()
     for tc in trial.trial_components:
-        # Set .../jobs/jobName to oddrn generator
-        oddrn_gen.set_oddrn_paths(jobs=tc.trial_component_name)
+        entities = map_trial_component(tc, oddrn_gen, artifacts_cache)
+        new_entities = [
+            e for e in entities if e.oddrn not in uniq_trial_components_oddrn
+        ]
+        result.extend(new_entities)
 
-        job_oddrn = oddrn_gen.get_oddrn_by_path("jobs")
-        job_oddrn = tc.to_data_entity(job_oddrn)
-
-        inputs_de = map_inputs(tc.input_artifacts, artifacts_cache, oddrn_gen)
-        outputs_de = map_outputs(tc.output_artifacts, artifacts_cache, oddrn_gen)
-
-        inputs_oddrn = [i.oddrn for i in inputs_de]
-        outputs_oddrn = [o.oddrn for o in outputs_de]
-
-        job_oddrn.data_transformer.inputs.extend(inputs_oddrn)
-        job_oddrn.data_transformer.outputs.extend(outputs_oddrn)
-
-        entities = [job_oddrn, *inputs_de, *outputs_de]
-
-        result.extend(e for e in entities if e.oddrn not in uniq_trial_components_oddrn)
-
-        uniq_trial_components_oddrn.update(
-            {job_oddrn.oddrn, *inputs_oddrn, *outputs_oddrn}
-        )
+        uniq_trial_components_oddrn.update({e.oddrn for e in entities})
 
     trial_de.data_entity_group.entities_list = list(uniq_trial_components_oddrn)
 

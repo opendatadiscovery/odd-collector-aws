@@ -1,7 +1,12 @@
 from datetime import datetime
 from typing import List
 
-from odd_models.models import DataEntity, DataEntityType, DataEntityGroup, MetadataExtension
+from odd_models.models import (
+    DataEntity,
+    DataEntityType,
+    DataEntityGroup,
+    MetadataExtension,
+)
 
 from .base_object import BaseObject, ToDataEntity
 from .source import Source
@@ -26,12 +31,12 @@ class Experiment(BaseObject, ToDataEntity):
         )
 
     def __extract_metadata(self):
-        schema = 'https://raw.githubusercontent.com/opendatadiscovery/opendatadiscovery-specification/main/specification/extensions/sagemaker.json#/definitions/Trial'
+        schema = "https://raw.githubusercontent.com/opendatadiscovery/opendatadiscovery-specification/main/specification/extensions/sagemaker.json#/definitions/Trial"
 
         metadata = {
-            'ExperimentArn': self.experiment_arn,
-            'CreationTime': self.creation_time,
-            'LastModifiedTime': self.last_modified_time
+            "ExperimentArn": self.experiment_arn,
+            "CreationTime": self.creation_time,
+            "LastModifiedTime": self.last_modified_time,
         }
 
         return [MetadataExtension(schema_url=schema, metadata=metadata)]
