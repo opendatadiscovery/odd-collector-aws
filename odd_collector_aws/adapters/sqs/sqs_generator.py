@@ -9,9 +9,7 @@ class SqsPathsModel(BasePathsModel):
     queue: Optional[str]
 
     class Config:
-        dependencies_map = {
-            'queue': ('queue',)
-        }
+        dependencies_map = {"queue": ("queue",)}
 
 
 class SqsGenerator(Generator):

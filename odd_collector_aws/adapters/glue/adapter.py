@@ -124,7 +124,7 @@ class Adapter(AbstractAdapter):
         while True:
             sdk_response = paginator.paginate(
                 **conf.parameters,
-                PaginationConfig={"MaxItems": conf.page_size, "StartingToken": token}
+                PaginationConfig={"MaxItems": conf.page_size, "StartingToken": token},
             )
 
             for entity in sdk_response.build_full_result()[conf.list_fetch_key]:

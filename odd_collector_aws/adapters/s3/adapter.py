@@ -49,11 +49,14 @@ class Adapter(AbstractAdapter):
                 schema = s3ds.get_schema()
                 if schema:
                     metadata = s3ds.get_metadata()
-                    logging.info(f"finishing sucsessfull fetch for {path} during {time.time()-start} seconds")
+                    logging.info(
+                        f"finishing sucsessfull fetch for {path} during"
+                        f" {time.time()-start} seconds"
+                    )
                     yield map_dataset(
                         name=path,
                         schema=schema,
                         metadata=metadata,
                         oddrn_gen=self.__oddrn_generator,
-                        rows_number=s3ds.get_rows()
+                        rows_number=s3ds.get_rows(),
                     )

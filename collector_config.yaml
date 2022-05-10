@@ -8,5 +8,10 @@ plugins:
     aws_region: "eu-central-1"
     aws_secret_access_key: ""
     aws_access_key_id: ""
-    paths: ['']
-
+    paths: [""]
+  # - type: sagemaker
+  #   name: sagemaker
+  #   aws_region: "us-east-1"
+  #   aws_secret_access_key: ""
+  #   aws_access_key_id: ""
+  #   experiments: ["adp-pipeline-model"]
