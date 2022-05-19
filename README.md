@@ -16,7 +16,16 @@ class AwsPlugin(Plugin):
 Due to the Plugin is inherited from `pydantic.BaseSetting`, each field missed in `collector-config.yaml` can be taken from env variables.
 
 ## Implemented adapters
-___
+ - [Athena](#athena)
+ - [DynamoDB](#dynamodb)
+ - [Glue](#glue)
+ - [Quicksight](#quicksight)
+ - [S3](#s3)
+ - [Sagemaker](#sagemaker)
+ - [SagemakerFeaturestore](#sagemaker-featurestore)
+ - [SQS](#sqs)
+
+
 ### __Athena__
 ```yaml
 type: athena
