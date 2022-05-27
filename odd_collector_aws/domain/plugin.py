@@ -46,6 +46,11 @@ class SagemakerFeaturestorePlugin(AwsPlugin):
     type: Literal["sagemaker_featurestore"]
 
 
+class KinesisPlugin(AwsPlugin):
+    type: Literal["kinesis"]
+    aws_account_id: str
+
+
 AvailablePlugin = Annotated[
     Union[
         GluePlugin,
@@ -56,6 +61,7 @@ AvailablePlugin = Annotated[
         SagemakerFeaturestorePlugin,
         SagemakerPlugin,
         SQSPlugin,
+        KinesisPlugin,
     ],
     pydantic.Field(discriminator="type"),
 ]
