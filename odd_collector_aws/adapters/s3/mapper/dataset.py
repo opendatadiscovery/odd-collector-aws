@@ -37,6 +37,7 @@ TYPE_MAP: Dict[str, Type] = {
     "time32": Type.TYPE_TIME,
     "time64": Type.TYPE_TIME,
     "timestamp": Type.TYPE_DATETIME,
+    "timestamp[s]": Type.TYPE_DATETIME,
     "date32": Type.TYPE_DATETIME,
     "date64": Type.TYPE_DATETIME,
     "duration": Type.TYPE_DURATION,
@@ -180,12 +181,15 @@ def map_column(
 
 def map_columns(schema: Schema, oddrn_gen: S3Generator) -> List[DataSetField]:
     flat_list = []
-    for i in range(0, len(schema)):
-        for item in map_column(
-            oddrn_gen=oddrn_gen,
-            type_parsed=__parse(str(schema.field(i).type)),
-            column_name=schema.field(i).name,
-        ):
-            flat_list.append(item)
+    for i in range(len(schema)):
+        flat_list.extend(
+            iter(
+                map_column(
+                    oddrn_gen=oddrn_gen,
+                    type_parsed=__parse(str(schema.field(i).type)),
+                    column_name=schema.field(i).name,
+                )
+            )
+        )
 
     return flat_list

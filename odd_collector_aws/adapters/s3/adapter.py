@@ -44,10 +44,8 @@ class Adapter(AbstractAdapter):
             start = time.time()
             logging.info(f"Starting metadat fetch for {path}")
             self.__oddrn_generator.set_oddrn_paths(buckets=path.split("/")[0])
-            s3ds = self.__schema_retriever.build_s3ds(path)
-            if s3ds:
-                schema = s3ds.get_schema()
-                if schema:
+            if s3ds := self.__schema_retriever.build_s3ds(path):
+                if schema := s3ds.get_schema():
                     metadata = s3ds.get_metadata()
                     logging.info(
                         f"finishing sucsessfull fetch for {path} during"
