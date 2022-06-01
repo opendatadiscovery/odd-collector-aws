@@ -17,6 +17,7 @@ SIMPLE_TYPE: "int8"i
         | "time32"i
         | "time64"i
         | "timestamp"i
+        | "timestamp[s]"i
         | "date32"i
         | "date64"i
         | "duration"i
