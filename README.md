@@ -8,6 +8,7 @@ To learn more about collector types and ODD Platform's architecture, [read the d
 ## Preview
  - [Implemented adapters](#implemented-adapters)
  - [How to build](#building)
+ - [Config example](#config-example)
 
 ## Implemented adapters
 ___
