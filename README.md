@@ -4,31 +4,27 @@
 ODD Collector is a lightweight service which gathers metadata from all your data sources.
 
 To learn more about collector types and ODD Platform's architecture, [read the documentation](https://docs.opendatadiscovery.org/architecture).
-## Domain
-___
-Main class for AWS plugins is `AwsPlugin` inherited from `odd-collector-sdk.domain.Plugin`. 
-```python
-class AwsPlugin(Plugin):
-    aws_secret_access_key: str
-    aws_access_key_id: str
-    aws_region: str
-```
-Due to the Plugin is inherited from `pydantic.BaseSetting`, each field missed in `collector-config.yaml` can be taken from env variables.
+
+## Preview
+ - [Implemented adapters](#implemented-adapters)
+ - [How to build](#building)
 
 ## Implemented adapters
+___
  - [Athena](#athena)
  - [DynamoDB](#dynamodb)
  - [Glue](#glue)
+ - [Kinesis](#kinesis)
  - [Quicksight](#quicksight)
  - [S3](#s3)
  - [Sagemaker](#sagemaker)
  - [SagemakerFeaturestore](#sagemaker-featurestore)
  - [SQS](#sqs)
 
-
 ### __Athena__
 ```yaml
 type: athena
+name: athena
 aws_secret_access_key: str
 aws_access_key_id: str
 aws_region: str
@@ -36,6 +32,7 @@ aws_region: str
 ### __DynamoDB__
 ```yaml
 type: dynamodb
+name: dynamodb
 exclude_tables: str[]
 aws_secret_access_key: str
 aws_access_key_id: str
@@ -44,13 +41,24 @@ aws_region: str[]
 ### __Glue__
 ```yaml
 type: glue
+name: glue
 aws_secret_access_key: str
 aws_access_key_id: str
 aws_region: str
 ```
+### __Kinesis__
+```yaml
+type: kinesis
+name: kinesis
+aws_secret_access_key: str
+aws_access_key_id: str
+aws_region: str
+aws_account_id: str
+```
 ### __Quicksight__
 ```yaml
 type: quicksight
+name: quicksight
 aws_secret_access_key: str
 aws_access_key_id: str
 aws_region: str
@@ -58,6 +66,7 @@ aws_region: str
 ### __S3__
 ```yaml
 type: s3
+name: s3
 paths: str[]
 aws_secret_access_key: str
 aws_access_key_id: str
@@ -67,6 +76,7 @@ aws_region: str
 ### __Sagemaker__
 ```yaml
 type: sagemaker
+name: sagemaker
 experiments: str[]
 aws_secret_access_key: str
 aws_access_key_id: str
@@ -76,6 +86,7 @@ aws_region: str
 ### __Sagemaker Featurestore__
 ```yaml
 type: sagemaker_featurestore
+name: sagemaker_featurestore
 aws_secret_access_key: str
 aws_access_key_id: str
 aws_region: str
@@ -84,17 +95,22 @@ aws_region: str
 ### __SQS__
 ```yaml
 type: sqs
+name: sqs
 aws_secret_access_key: str
 aws_access_key_id: str
 aws_region: str
 ```
 
 ## Building
+___
 ```bash
 docker build .
 ```
 
-## Example of docker-compose.yaml
+## Config example
+___
+Due to the Plugin is inherited from `pydantic.BaseSetting`, each field missed in `collector-config.yaml` can be taken from env variables.
+
 Custom `.env` file for docker-compose.yaml
 ```
 AWS_REGION=
