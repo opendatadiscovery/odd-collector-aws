@@ -11,7 +11,6 @@ To learn more about collector types and ODD Platform's architecture, [read the d
  - [Config example](#config-example)
 
 ## Implemented adapters
-___
  - [Athena](#athena)
  - [DynamoDB](#dynamodb)
  - [Glue](#glue)
@@ -103,13 +102,11 @@ aws_region: str
 ```
 
 ## Building
-___
 ```bash
 docker build .
 ```
 
 ## Config example
-___
 Due to the Plugin is inherited from `pydantic.BaseSetting`, each field missed in `collector-config.yaml` can be taken from env variables.
 
 Custom `.env` file for docker-compose.yaml
