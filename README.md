@@ -67,10 +67,13 @@ aws_region: str
 ```yaml
 type: s3
 name: s3
-paths: str[]
 aws_secret_access_key: str
 aws_access_key_id: str
 aws_region: str
+datasets:
+  - bucket: str
+    path: str
+    each_file_as_dataset: Optional[bool]
 ```
 
 ### __Sagemaker__

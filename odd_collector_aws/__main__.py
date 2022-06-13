@@ -7,7 +7,8 @@ from odd_collector_sdk.collector import Collector
 from odd_collector_aws.domain.plugin import AvailablePlugin
 
 logging.basicConfig(
-    level=logging.INFO, format="[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
+    level=logging.INFO,
+    format="[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
 )
 
 try:
