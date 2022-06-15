@@ -3,12 +3,12 @@ token: ""
 platform_host_url: "http://localhost:8080"
 plugins:
   - type: s3
-    name: s3_dev_adapter
+    name: s3_adapter
     aws_secret_access_key: ""
     aws_access_key_id: ""
     aws_region: "eu-central-1"
-    # endpoint_url: "http://localhost:9000"
+#    endpoint_url: ""
     datasets:
       - bucket: "bucket"
-        path: "subfolder/"
-        # each_file_as_dataset: true
+        path: "/"
+#        each_file_as_dataset: true

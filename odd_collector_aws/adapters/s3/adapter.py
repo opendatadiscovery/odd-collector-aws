@@ -3,7 +3,6 @@ from typing import List
 
 from odd_collector_sdk.domain.adapter import AbstractAdapter
 from odd_models.models import DataEntityList
-from oddrn_generator.generators import S3Generator
 
 from odd_collector_aws.domain.plugin import S3Plugin, DatasetConfig
 from .client import Client
@@ -20,12 +19,7 @@ class Adapter(AbstractAdapter):
         self.s3_client = Client(config)
         self.fs = FileSystem(config)
 
-        self.__oddrn_generator = S3Generator(
-            cloud_settings={
-                "region": config.aws_region,
-                "account": self.s3_client.account_id,
-            }
-        )
+        self.__oddrn_generator = self.s3_client.get_oddrn_generator()
 
     def get_data_source_oddrn(self) -> str:
         return self.__oddrn_generator.get_data_source_oddrn()
