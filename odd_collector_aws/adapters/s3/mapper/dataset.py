@@ -1,5 +1,6 @@
-from typing import Dict, List, Any
+from typing import List, Dict, Any
 
+from lark import Lark
 from odd_models.models import (
     DataSetField,
     Type,
@@ -9,12 +10,10 @@ from odd_models.models import (
     DataEntityType,
 )
 from oddrn_generator.generators import S3Generator
-from pyarrow import Field, Schema, lib
-from more_itertools import flatten
-from lark import Lark, LarkError
+from pyarrow import Schema
+
 from .s3_field_type_transformer import S3FieldTypeTransformer
-from lark import Transformer, Token
-from typing import List, Tuple, Dict, Any, Iterable
+from ..dataset import S3Dataset
 
 SCHEMA_FILE_URL = (
     "https://raw.githubusercontent.com/opendatadiscovery/opendatadiscovery-specification/"
@@ -66,20 +65,29 @@ def __parse(field_type: str) -> Dict[str, Any]:
     return field_type_transformer.transform(column_tree)
 
 
+def s3_path_to_name(path: str, joiner: str = ":") -> str:
+    """
+    Remove the bucket name from the path and return the name of the file.
+    """
+    without_bucket = path.rstrip("/").split("/")[1:]
+    return joiner.join(without_bucket)
+
+
 def map_dataset(
-    name, schema: Schema, metadata: Dict, oddrn_gen: S3Generator, rows_number
+    s3_dataset: S3Dataset,
+    oddrn_gen: S3Generator,
 ) -> DataEntity:
-    name = ":".join(name.split("/")[1:])
+    name = s3_path_to_name(s3_dataset.path)
 
     oddrn_gen.set_oddrn_paths(keys=name)
     metadata = [
         {
             "schema_url": f"{SCHEMA_FILE_URL}#/definitions/S3DataSetExtension",
-            "metadata": metadata,
+            "metadata": s3_dataset.metadata,
         }
     ]
 
-    columns = map_columns(schema, oddrn_gen)
+    columns = map_columns(s3_dataset.schema, oddrn_gen)
 
     return DataEntity(
         name=name,
@@ -89,7 +97,7 @@ def map_dataset(
         updated_at=None,
         created_at=None,
         type=DataEntityType.FILE,
-        dataset=DataSet(rows_number=rows_number, field_list=columns),
+        dataset=DataSet(rows_number=s3_dataset.rows_number, field_list=columns),
     )
 
 
