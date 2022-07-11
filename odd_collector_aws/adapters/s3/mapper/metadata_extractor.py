@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from pprint import pprint
 from typing import Tuple
 
 import pyarrow.dataset as ds
 
 from odd_collector_aws.adapters.s3.file_system import FileSystem
+from odd_collector_aws.utils import parse_s3_url
 
 
 class MetadataExtractor(ABC):
@@ -46,9 +46,7 @@ class FolderMetadataExtractor(MetadataExtractor):
         result["Region"] = folder_dataset.filesystem.region
         li = []
 
-        for file in folder_dataset.files[
-            0 : FolderMetadataExtractor.N_FILES_SIZE_ESTIMATION
-        ]:
+        for file in folder_dataset.files[0 : self.N_FILES_SIZE_ESTIMATION]:
             li.append(folder_dataset.filesystem.get_file_info(file).size)
 
         result["Avg. file size"] = round(sum(li) / len(li))
@@ -65,7 +63,7 @@ class FolderMetadataExtractor(MetadataExtractor):
 
 class FileMetadataExtractor(MetadataExtractor):
     def extract(self) -> dict:
-        bucket, key = split_to_bucket_key(self._original_path)
+        bucket, key = parse_s3_url(self._original_path)
         return {
             "Format": self._dataset.format.default_extname,
             "Rows": self._dataset.count_rows(),

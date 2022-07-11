@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Any, Generator, Optional
+from typing import Optional, Iterable
 
-from ..domain.experiment import Experiment
+from odd_collector_aws.adapters.sagemaker.domain.experiment import Experiment
 
 
 class Client(ABC):
@@ -9,7 +9,5 @@ class Client(ABC):
         pass
 
     @abstractmethod
-    def get_experiments(
-        self, experiments_name: Optional[str]
-    ) -> Generator[Experiment, Any, Any]:
+    def get_experiments(self, experiments_name: Optional[str]) -> Iterable[Experiment]:
         raise NotImplementedError

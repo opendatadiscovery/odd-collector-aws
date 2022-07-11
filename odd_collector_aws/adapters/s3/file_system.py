@@ -1,15 +1,13 @@
 import pyarrow.dataset as ds
 from pyarrow.fs import S3FileSystem
 
-from odd_collector_aws.domain.plugin import S3Plugin
-
 
 class FileSystem:
     """
     FileSystem hides pyarrow.fs implementation details.
     """
 
-    def __init__(self, config: S3Plugin):
+    def __init__(self, config):
         self.__fs = S3FileSystem(
             access_key=config.aws_access_key_id,
             secret_key=config.aws_secret_access_key,

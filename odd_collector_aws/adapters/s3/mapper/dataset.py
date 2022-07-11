@@ -13,13 +13,13 @@ from oddrn_generator.generators import S3Generator
 from pyarrow import Schema
 
 from .s3_field_type_transformer import S3FieldTypeTransformer
-from ..dataset import S3Dataset
 
 SCHEMA_FILE_URL = (
     "https://raw.githubusercontent.com/opendatadiscovery/opendatadiscovery-specification/"
     "main/specification/extensions/s3.json"
 )
 
+# TODO: create common grammar rule for date
 TYPE_MAP: Dict[str, Type] = {
     "int8": Type.TYPE_INTEGER,
     "int16": Type.TYPE_INTEGER,
@@ -29,6 +29,7 @@ TYPE_MAP: Dict[str, Type] = {
     "uint16": Type.TYPE_INTEGER,
     "uint32": Type.TYPE_INTEGER,
     "uint64": Type.TYPE_INTEGER,
+    "float": Type.TYPE_NUMBER,
     "float8": Type.TYPE_NUMBER,
     "float16": Type.TYPE_NUMBER,
     "float32": Type.TYPE_NUMBER,
@@ -38,6 +39,7 @@ TYPE_MAP: Dict[str, Type] = {
     "timestamp": Type.TYPE_DATETIME,
     "timestamp[s]": Type.TYPE_DATETIME,
     "date32": Type.TYPE_DATETIME,
+    "date32[day]": Type.TYPE_DATETIME,
     "date64": Type.TYPE_DATETIME,
     "duration": Type.TYPE_DURATION,
     "month_day_nano_interval": Type.TYPE_DURATION,
@@ -53,6 +55,8 @@ TYPE_MAP: Dict[str, Type] = {
     "struct": Type.TYPE_STRUCT,
     "union": Type.TYPE_UNION,
     "double": Type.TYPE_NUMBER,
+    "bool": Type.TYPE_BOOLEAN,
+    "dictionary": Type.TYPE_STRUCT,
 }
 field_type_transformer = S3FieldTypeTransformer()
 parser = Lark.open(
@@ -74,7 +78,7 @@ def s3_path_to_name(path: str, joiner: str = ":") -> str:
 
 
 def map_dataset(
-    s3_dataset: S3Dataset,
+    s3_dataset: Any,
     oddrn_gen: S3Generator,
 ) -> DataEntity:
     name = s3_path_to_name(s3_dataset.path)

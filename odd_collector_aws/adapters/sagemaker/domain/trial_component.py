@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, Dict, List, Union
+from typing import Optional, Dict, List, Union, Any
 
 from odd_models.models import (
     DataEntity,
@@ -7,33 +7,36 @@ from odd_models.models import (
     DataTransformer,
     MetadataExtension,
 )
-from pydantic import validator
 
+from odd_collector_aws.adapters.sagemaker.domain.base_sagemaker_entity import (
+    BaseSagemakerEntity,
+)
+from odd_collector_aws.adapters.sagemaker.domain.source import Source
+from odd_collector_aws.adapters.sagemaker.utils.parse_job_name import parse_job_name
+from odd_collector_aws.const import METADATA_PREFIX
+from odd_collector_aws.domain.to_data_entity import ToDataEntity
 from odd_collector_aws.utils import flatdict
-from .artifact import Artifact
-from .base_object import BaseObject, ToDataEntity
-from .source import Source
 
 
-class UserInfo(BaseObject):
+class UserInfo(BaseSagemakerEntity):
     user_profile_arn: Optional[str]
     user_profile_name: Optional[str]
     domain_id: Optional[str]
 
 
-class TrialComponentStatus(BaseObject):
+class TrialComponentStatus(BaseSagemakerEntity):
     primary_status: str
     message: str
 
 
-class MetadataProperties(BaseObject):
+class MetadataProperties(BaseSagemakerEntity):
     commit_id: str
     repository: str
     generated_by: str
     project_id: str
 
 
-class Parameter(BaseObject):
+class Parameter(BaseSagemakerEntity):
     number_value: Optional[float]
     string_value: Optional[str]
 
@@ -41,16 +44,8 @@ class Parameter(BaseObject):
     def value(self):
         return self.number_value if self.number_value is not None else self.string_value
 
-    @classmethod
-    def parse_name(cls, name: str):
-        if name.startswith("SageMaker."):
-            xs = name.split(".")
-            name = ".".join(xs[1:])
 
-        return f"{name}"
-
-
-class Metric(BaseObject):
+class Metric(BaseSagemakerEntity):
     metric_name: str
     source_arn: str
     time_stamp: datetime
@@ -62,7 +57,7 @@ class Metric(BaseObject):
     std_dev: float
 
 
-class TrialComponent(BaseObject, ToDataEntity):
+class TrialComponent(BaseSagemakerEntity, ToDataEntity):
     trial_component_name: str
     trial_component_arn: str
     display_name: str
@@ -75,26 +70,25 @@ class TrialComponent(BaseObject, ToDataEntity):
     created_by: UserInfo
     last_modified_by: UserInfo
     parameters: Optional[Dict[str, Parameter]]
-    input_artifacts: List[Artifact]
-    output_artifacts: List[Artifact]
+    input_artifacts: List[Any]
+    output_artifacts: List[Any]
     metrics: List[Metric]
 
-    @validator("trial_component_name")
-    def passwords_match(cls, v: str):
-        return "-".join(v.split("-")[2:])
+    @property
+    def arn(self):
+        return self.trial_component_arn
 
-    def to_data_entity(
-        self, oddrn: str, inputs: List[str] = None, outputs: List[str] = None
-    ) -> DataEntity:
-        if inputs is None:
-            inputs = []
-        if outputs is None:
-            outputs = []
+    @property
+    def name(self):
+        return parse_job_name(self.trial_component_name)
+
+    def to_data_entity(self, oddrn_generator, inputs, outputs) -> DataEntity:
+        oddrn = oddrn_generator.get_oddrn_by_path("jobs")
         return DataEntity(
             oddrn=oddrn,
             created_at=self.creation_time,
             updated_at=self.last_modified_time,
-            name=self.trial_component_name,
+            name=self.name,
             type=DataEntityType.JOB,
             metadata=self.__extract_metadata(),
             data_transformer=DataTransformer(
@@ -104,22 +98,18 @@ class TrialComponent(BaseObject, ToDataEntity):
         )
 
     def __get_parameters_dict(self) -> Dict[str, Union[str, float]]:
-        return {
-            Parameter.parse_name(name): parameter.value
-            for name, parameter in self.parameters.items()
-        }
+        return {name: parameter.value for name, parameter in self.parameters.items()}
 
     def __get_metrics(self):
         res = {}
-        for m in self.metrics:
-            for k, v in m.__dict__.items():
-                uid = f"Metric.{m.metric_name}.{k}"
+        for metric in self.metrics:
+            for k, v in metric.__dict__.items():
+                uid = f"Metric.{metric.metric_name}.{k}"
                 res[uid] = v
-
         return res
 
     def __extract_metadata(self):
-        schema = "https://raw.githubusercontent.com/opendatadiscovery/opendatadiscovery-specification/main/specification/extensions/sagemaker.json#/definitions/TrialComponent"
+        schema = f"{METADATA_PREFIX}/sagemaker.json#/definitions/TrialComponent"
 
         meta = {**flatdict(self.source), **flatdict(self.__get_parameters_dict())}
 
@@ -127,3 +117,13 @@ class TrialComponent(BaseObject, ToDataEntity):
             meta |= self.__get_metrics()
 
         return [MetadataExtension(schema_url=schema, metadata=flatdict(meta))]
+
+
+def add_input(trial_component: DataEntity, input_oddrn: str):
+    if input_oddrn not in trial_component.data_transformer.inputs:
+        trial_component.data_transformer.inputs.append(input_oddrn)
+
+
+def add_output(trial_component: DataEntity, output_oddrn: str):
+    if output_oddrn not in trial_component.data_transformer.outputs:
+        trial_component.data_transformer.outputs.append(output_oddrn)
