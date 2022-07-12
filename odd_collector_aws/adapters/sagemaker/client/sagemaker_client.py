@@ -157,7 +157,7 @@ class SagemakerClient(Client):
             list_fetch_key="AssociationSummaries",
             kwargs=kwargs,
         )
-        return lmapcat(Association.parse_obj, self._fetch(pconf))
+        return [Association.parse_obj(resp) for resp in self._fetch(pconf)]
 
     def _fetch(self, conf: PaginatorConfig):
         paginator = self.client.get_paginator(conf.op_name)

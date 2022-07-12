@@ -1,10 +1,9 @@
-from typing import List, Literal, Optional, Union
+from typing import List, Literal, Optional
 
-import pydantic
 from odd_collector_sdk.domain.plugin import Plugin
-from typing_extensions import Annotated
 
 from odd_collector_aws.domain.dataset_config import DatasetConfig
+from odd_collector_sdk.types import PluginFactory
 
 
 class AwsPlugin(Plugin):
@@ -57,17 +56,14 @@ class KinesisPlugin(AwsPlugin):
     aws_account_id: str
 
 
-AvailablePlugin = Annotated[
-    Union[
-        GluePlugin,
-        DynamoDbPlugin,
-        AthenaPlugin,
-        S3Plugin,
-        QuicksightPlugin,
-        SagemakerFeaturestorePlugin,
-        SagemakerPlugin,
-        SQSPlugin,
-        KinesisPlugin,
-    ],
-    pydantic.Field(discriminator="type"),
-]
+PLUGIN_FACTORY: PluginFactory = {
+    "glue": GluePlugin,
+    "dynamodb": DynamoDbPlugin,
+    "athena": AthenaPlugin,
+    "sqs": SQSPlugin,
+    "s3": S3Plugin,
+    "quicksight": QuicksightPlugin,
+    "sagemaker": SagemakerPlugin,
+    "sagemaker_featurestore": SagemakerFeaturestorePlugin,
+    "kinesis": KinesisPlugin,
+}

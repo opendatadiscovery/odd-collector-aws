@@ -19,5 +19,7 @@ class AccountIdError(Exception):
 
 
 class MappingError(Exception):
+    message = "Error during mapping"
+
     def __init__(self):
-        super().__init__("Error during mapping")
+        super().__init__(self.message)

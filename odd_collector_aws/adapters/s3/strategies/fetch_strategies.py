@@ -35,7 +35,7 @@ class EachFileStrategy(FetchStrategyBase):
         result = []
         for file_path in paths:
             try:
-                logger.info(f"Create dataset for {file_path}")
+                logger.debug(f"Create dataset for {file_path}")
                 result.append(create_s3_dataset_for_file(file_path, self.s3_client.fs))
             except InvalidFileFormatWarning as e:
                 logger.warning(e)
