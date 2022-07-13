@@ -35,6 +35,7 @@ class SQSPlugin(AwsPlugin):
 class S3Plugin(AwsPlugin):
     type: Literal["s3"]
     endpoint_url: Optional[str] = None
+    aws_region: Optional[str] = None
     datasets: Optional[List[DatasetConfig]] = []
 
 
@@ -57,13 +58,13 @@ class KinesisPlugin(AwsPlugin):
 
 
 PLUGIN_FACTORY: PluginFactory = {
-    "glue": GluePlugin,
-    "dynamodb": DynamoDbPlugin,
     "athena": AthenaPlugin,
-    "sqs": SQSPlugin,
-    "s3": S3Plugin,
-    "quicksight": QuicksightPlugin,
-    "sagemaker": SagemakerPlugin,
-    "sagemaker_featurestore": SagemakerFeaturestorePlugin,
+    "dynamodb": DynamoDbPlugin,
+    "glue": GluePlugin,
     "kinesis": KinesisPlugin,
+    "quicksight": QuicksightPlugin,
+    "s3": S3Plugin,
+    "sagemaker_featurestore": SagemakerFeaturestorePlugin,
+    "sagemaker": SagemakerPlugin,
+    "sqs": SQSPlugin,
 }

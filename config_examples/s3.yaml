@@ -1,0 +1,35 @@
+# S3 collector-config.yaml example
+platform_host_url: "http://localhost:8080"
+default_pulling_interval: 10
+token: ""
+plugins:
+  - type: s3
+    name: s3_adapter
+    aws_secret_access_key: <aws_secret_access_key>
+    aws_access_key_id: <aws_access_key_id>
+    aws_region: <aws_region>
+    datasets:
+      - bucket: bucket_name
+        path: folder
+      - bucket: bucket_name
+        path: folder/subfolder/file.csv
+      - bucket: bucket_name"
+        path: folder/
+        partitioning: 'hive'
+        folder_as_dataset: True
+
+# S3 compatible collector-config.yaml example
+platform_host_url: "http://localhost:8080"
+default_pulling_interval: 10
+token: ""
+plugins:
+  - type: s3
+    name: s3_minio_adapter
+    endpoint_url: <some_endpoint>
+    aws_secret_access_key: <aws_secret_access_key>
+    aws_access_key_id: <aws_access_key_id>
+    aws_region: <aws_region>
+    datasets:
+      - bucket: bucket_name
+        path: folder
+
