@@ -8,137 +8,29 @@ To learn more about collector types and ODD Platform's architecture, [read the d
 ## Preview
  - [Implemented adapters](#implemented-adapters)
  - [How to build](#building)
- - [Config example](#config-example)
+ - [Docker compose example](#docker-compose-example)
 
 ## Implemented adapters
- - [Athena](#athena)
- - [DynamoDB](#dynamodb)
- - [Glue](#glue)
- - [Kinesis](#kinesis)
- - [Quicksight](#quicksight)
- - [S3](#s3)
- - [Sagemaker](#sagemaker)
- - [SagemakerFeaturestore](#sagemaker-featurestore)
- - [SQS](#sqs)
-
-### __Athena__
-```yaml
-type: athena
-name: athena
-aws_secret_access_key: str
-aws_access_key_id: str
-aws_region: str
-```
-### __DynamoDB__
-```yaml
-type: dynamodb
-name: dynamodb
-exclude_tables: str[]
-aws_secret_access_key: str
-aws_access_key_id: str
-aws_region: str[]
-```
-### __Glue__
-```yaml
-type: glue
-name: glue
-aws_secret_access_key: str
-aws_access_key_id: str
-aws_region: str
-```
-### __Kinesis__
-```yaml
-type: kinesis
-name: kinesis
-aws_secret_access_key: str
-aws_access_key_id: str
-aws_region: str
-aws_account_id: str
-```
-### __Quicksight__
-```yaml
-type: quicksight
-name: quicksight
-aws_secret_access_key: str
-aws_access_key_id: str
-aws_region: str
-```
-
-### __S3__
-
-```yaml
-type: s3
-name: s3
-aws_secret_access_key: str
-aws_access_key_id: str
-aws_region: str
-datasets:
-  - bucket: str
-    path: str
-    folder_as_dataset: Optional[bool]
-```
-
-There 2 main strategies how we fetch metadata:
-#### 1. Default
-```yaml
-...
-datasets:
-  - bucket: my_bucket
-    path: folder
-```
-Will take metadata about all s3 objects under `my_bucket/folder` path
-
-Note:  `folder/subfolder`, `folder/file_prefix`, `folder/file.csv` - are all valid paths
-
-#### 2. Folder as dataset
-```yaml
-...
-datasets:
-  - bucket: my_bucket
-    path: folder/
-    folder_as_dataset: True
-```
-Useful when you have same schema for all files for the folder.
-
-Simple use case: getting metadata for Hive partition data.
+| Service               | Config example                                        |
+| --------------------- | ----------------------------------------------------- |
+| Athena                | [config](config_examples/athena.yaml)                 |
+| DynamoDB              | [config](config_examples/dynamodb.yaml)               |
+| Glue                  | [config](config_examples/glue.yaml)                   |
+| Kinesis               | [config](config_examples/kinesis.yaml)                |
+| Quicksight            | [config](config_examples/quicksight.yaml)             |
+| S3                    | [config](config_examples/s3.yaml)                     |
+| Sagemaker             | [config](config_examples/sagemaker.yaml)              |
+| SQS                   | [config](config_examples/sqs.yaml)                    |
+| SagemakerFeaturestore | [config](config_examples/sagemaker_featurestore.yaml) |
 
 
-
-
-### __Sagemaker__
-```yaml
-type: sagemaker
-name: sagemaker
-experiments: str[]
-aws_secret_access_key: str
-aws_access_key_id: str
-aws_region: str
-```
-
-### __Sagemaker Featurestore__
-```yaml
-type: sagemaker_featurestore
-name: sagemaker_featurestore
-aws_secret_access_key: str
-aws_access_key_id: str
-aws_region: str
-```
-
-### __SQS__
-```yaml
-type: sqs
-name: sqs
-aws_secret_access_key: str
-aws_access_key_id: str
-aws_region: str
-```
 
 ## Building
 ```bash
 docker build .
 ```
 
-## Config example
+## Docker compose example
 Due to the Plugin is inherited from `pydantic.BaseSetting`, each field missed in `collector-config.yaml` can be taken from env variables.
 
 Custom `.env` file for docker-compose.yaml
@@ -151,16 +43,15 @@ PLATFORM_HOST_URL=http://odd-platform:8080
 
 Custom `collector-config.yaml`
 ```yaml
-provider_oddrn: collector
 platform_host_url: "http://localhost:8080"
 default_pulling_interval: 10
 token: ""
 plugins:
-  - type: glue
-    name: test_glue_adapter
   - type: s3
     name: test_s3_adapter
-    paths: ['some_bucket_name']
+    datasets:
+      - bucket: bucket_name
+        path: some_data
 ```
 
 docker-compose.yaml
@@ -175,7 +66,7 @@ services:
     ...
   
   odd-collector-aws:
-    image: 'image_name'
+    image: 'ghcr.io/opendatadiscovery/odd-collector-aws:latest'
     restart: always
     volumes:
       - collector_config.yaml:/app/collector_config.yaml
