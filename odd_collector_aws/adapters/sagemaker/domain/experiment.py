@@ -8,12 +8,13 @@ from odd_models.models import (
     MetadataExtension,
 )
 
-from .base_object import BaseObject, ToDataEntity
+from odd_collector_aws.domain.to_data_entity import ToDataEntity
+from .base_sagemaker_entity import BaseSagemakerEntity
 from .source import Source
 from .trial import Trial
 
 
-class Experiment(BaseObject, ToDataEntity):
+class Experiment(BaseSagemakerEntity, ToDataEntity):
     experiment_arn: str
     experiment_name: str
     source: Source
@@ -21,7 +22,12 @@ class Experiment(BaseObject, ToDataEntity):
     last_modified_time: datetime
     trials: List[Trial] = []
 
-    def to_data_entity(self, oddrn: str) -> DataEntity:
+    @property
+    def arn(self):
+        return self.experiment_arn
+
+    def to_data_entity(self, oddrn_generator) -> DataEntity:
+        oddrn = oddrn_generator.get_oddrn_by_path("experiments")
         return DataEntity(
             oddrn=oddrn,
             name=self.experiment_name,

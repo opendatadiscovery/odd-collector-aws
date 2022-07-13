@@ -63,7 +63,9 @@ aws_secret_access_key: str
 aws_access_key_id: str
 aws_region: str
 ```
+
 ### __S3__
+
 ```yaml
 type: s3
 name: s3
@@ -73,8 +75,35 @@ aws_region: str
 datasets:
   - bucket: str
     path: str
-    each_file_as_dataset: Optional[bool]
+    folder_as_dataset: Optional[bool]
 ```
+
+There 2 main strategies how we fetch metadata:
+#### 1. Default
+```yaml
+...
+datasets:
+  - bucket: my_bucket
+    path: folder
+```
+Will take metadata about all s3 objects under `my_bucket/folder` path
+
+Note:  `folder/subfolder`, `folder/file_prefix`, `folder/file.csv` - are all valid paths
+
+#### 2. Folder as dataset
+```yaml
+...
+datasets:
+  - bucket: my_bucket
+    path: folder/
+    folder_as_dataset: True
+```
+Useful when you have same schema for all files for the folder.
+
+Simple use case: getting metadata for Hive partition data.
+
+
+
 
 ### __Sagemaker__
 ```yaml
@@ -155,6 +184,7 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - PLATFORM_HOST_URL=${PLATFORM_HOST_URL}
+      - LOGLEVEL='DEBUG'
     depends_on:
       - odd-platform
 ```

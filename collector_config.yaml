@@ -6,9 +6,7 @@ plugins:
     name: s3_adapter
     aws_secret_access_key: ""
     aws_access_key_id: ""
-    aws_region: "eu-central-1"
-#    endpoint_url: ""
+    aws_region: ""
     datasets:
-      - bucket: "bucket"
-        path: "/"
-#        each_file_as_dataset: true
+      - bucket: ""
+        path: ""

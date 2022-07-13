@@ -1,3 +1,8 @@
+"""
+S3Compatible generator, for cases like Minio when we can't take region/account_id
+"""
+
+
 from oddrn_generator import Generator
 from oddrn_generator.path_models import S3PathsModel
 from oddrn_generator.server_models import AbstractServerModel

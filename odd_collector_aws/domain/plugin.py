@@ -1,15 +1,18 @@
-from typing import List, Literal, Optional, Union
+from typing import List, Literal, Optional
 
-import pydantic
 from odd_collector_sdk.domain.plugin import Plugin
-from pydantic import validator
-from typing_extensions import Annotated
+
+from odd_collector_aws.domain.dataset_config import DatasetConfig
+from odd_collector_sdk.types import PluginFactory
 
 
 class AwsPlugin(Plugin):
     aws_secret_access_key: str
     aws_access_key_id: str
     aws_region: str
+    aws_session_token: Optional[str]
+    aws_account_id: Optional[str]
+    endpoint_url: Optional[str]
 
 
 class GluePlugin(AwsPlugin):
@@ -27,33 +30,6 @@ class AthenaPlugin(AwsPlugin):
 
 class SQSPlugin(AwsPlugin):
     type: Literal["sqs"]
-
-
-class DatasetConfig(pydantic.BaseModel):
-    bucket: str
-    path: str
-    partitioning: Optional[str] = None
-    each_file_as_dataset: bool = False
-
-    @property
-    def full_path(self) -> str:
-        return f"{self.bucket}/{self.path}"
-
-    @validator("each_file_as_dataset")
-    def validate_each_file_as_dataset(cls, v: Optional[bool], values) -> Optional[int]:
-        if not values.get("path").endswith("/"):
-            raise ValueError("For each_file_as_dataset, path must end with '/'")
-
-        if values.get("path") == "/" and not v:
-            raise ValueError("For root bucket path, each_file_as_dataset must be True")
-
-        return v
-
-    @validator("partitioning")
-    def validate_partitioning(cls, v: Optional[bool], values) -> Optional[int]:
-        if not values.get("path").endswith("/"):
-            raise ValueError("For partitioning, path must end with '/'")
-        return v
 
 
 class S3Plugin(AwsPlugin):
@@ -80,17 +56,14 @@ class KinesisPlugin(AwsPlugin):
     aws_account_id: str
 
 
-AvailablePlugin = Annotated[
-    Union[
-        GluePlugin,
-        DynamoDbPlugin,
-        AthenaPlugin,
-        S3Plugin,
-        QuicksightPlugin,
-        SagemakerFeaturestorePlugin,
-        SagemakerPlugin,
-        SQSPlugin,
-        KinesisPlugin,
-    ],
-    pydantic.Field(discriminator="type"),
-]
+PLUGIN_FACTORY: PluginFactory = {
+    "glue": GluePlugin,
+    "dynamodb": DynamoDbPlugin,
+    "athena": AthenaPlugin,
+    "sqs": SQSPlugin,
+    "s3": S3Plugin,
+    "quicksight": QuicksightPlugin,
+    "sagemaker": SagemakerPlugin,
+    "sagemaker_featurestore": SagemakerFeaturestorePlugin,
+    "kinesis": KinesisPlugin,
+}

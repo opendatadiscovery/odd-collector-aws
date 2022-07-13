@@ -1,11 +1,11 @@
 from typing import Dict, Union, Callable, Any, Optional
 
-import pydantic
+from pydantic import BaseModel, Field
 
 
-class PaginatorConfig(pydantic.BaseModel):
+class PaginatorConfig(BaseModel):
     op_name: str
-    parameters: Dict[str, Union[str, int]] = pydantic.Field(default_factory=dict)
+    parameters: Dict[str, Union[str, int]] = Field(default_factory=dict)
     page_size: Optional[int]
     payload_key: str = None
     list_fetch_key: str = None

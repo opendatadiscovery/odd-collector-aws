@@ -1,5 +1,3 @@
-import logging
-
 from lark import Transformer, Token
 
 
@@ -8,8 +6,10 @@ class S3FieldTypeTransformer(Transformer):
         return items[1] | {"field_name": str(items[0])}
 
     def struct_type(self, items):
-        logging.info(items)
         return {"type": "struct", "children": items}
+
+    def dictionary_type(self, items):
+        return {"type": "dicitionary", "children": items}
 
     def type(self, items):
         obj = items[0]

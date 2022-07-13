@@ -1,30 +1,33 @@
 import asyncio
 import logging
+import os
 from os import path
 
 from odd_collector_sdk.collector import Collector
 
-from odd_collector_aws.domain.plugin import AvailablePlugin
+from odd_collector_aws.domain.plugin import PLUGIN_FACTORY
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
+    level=os.getenv("LOGLEVEL", "INFO"),
+    format="[%(asctime)s] %(levelname)s in %(name)s: %(message)s",
 )
+logger = logging.getLogger("odd-collector-aws")
 
-try:
-    loop = asyncio.get_event_loop()
+if __name__ == "__main__":
+    try:
+        loop = asyncio.get_event_loop()
 
-    cur_dirname = path.dirname(path.realpath(__file__))
-    config_path = path.join(cur_dirname, "../collector_config.yaml")
-    root_package = "odd_collector_aws.adapters"
+        cur_dirname = path.dirname(path.realpath(__file__))
+        config_path = path.join(cur_dirname, "../collector_config.yaml")
+        root_package = "odd_collector_aws.adapters"
 
-    collector = Collector(config_path, root_package, AvailablePlugin)
+        collector = Collector(config_path, root_package, PLUGIN_FACTORY)
 
-    loop.run_until_complete(collector.register_data_sources())
+        loop.run_until_complete(collector.register_data_sources())
 
-    collector.start_polling()
+        collector.start_polling()
 
-    asyncio.get_event_loop().run_forever()
-except Exception as e:
-    logging.error(e, exc_info=True)
-    asyncio.get_event_loop().stop()
+        asyncio.get_event_loop().run_forever()
+    except Exception as e:
+        logger.error(e)
+        asyncio.get_event_loop().stop()
