@@ -342,7 +342,7 @@ sqlparse = "0.4.2"
 
 [[package]]
 name = "oddrn-generator"
-version = "0.1.37"
+version = "0.1.45"
 description = "Open Data Discovery Resource Name Generator"
 category = "main"
 optional = false
@@ -667,7 +667,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "902ad14f649a34628ceb78ef576b5c3cb985842c63a863ed2a5914c987caeedf"
+content-hash = "d7256a5019a09c32c4e326f2085c8e6de38174990d47a673099003b212e22bd6"
 
 [metadata.files]
 aiohttp = [
@@ -993,10 +993,7 @@ odd-models = [
     {file = "odd-models-2.0.4.tar.gz", hash = "sha256:778a2e0a1c104c44e405f55a2de42dae684263b5b2844d79ed552eeeacc315e9"},
     {file = "odd_models-2.0.4-py3-none-any.whl", hash = "sha256:86ebed3f936fa2f227fb9bcfdfcf824c1ca82d689473ccaa5d23d41197d1dd5a"},
 ]
-oddrn-generator = [
-    {file = "oddrn-generator-0.1.37.tar.gz", hash = "sha256:f04b2f78da2e07743056e6c6cc17373dbe2dacf5693bc3fbdf1384322ad886ef"},
-    {file = "oddrn_generator-0.1.37-py3-none-any.whl", hash = "sha256:4566e9411c8decd29b9ebc175a7b438d73769e8a8ae11cd0224ad44fdd70fa38"},
-]
+oddrn-generator = []
 packaging = [
     {file = "packaging-21.3-py3-none-any.whl", hash = "sha256:ef103e05f519cdc783ae24ea4e2e0f508a9c99b2d4969652eed6a2e1ea5bd522"},
     {file = "packaging-21.3.tar.gz", hash = "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb"},
