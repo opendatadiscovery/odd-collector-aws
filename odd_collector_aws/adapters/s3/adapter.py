@@ -1,26 +1,29 @@
-from odd_collector_sdk.domain.adapter import AbstractAdapter
-from odd_models.models import DataEntityList
-from oddrn_generator.generators import S3Generator
-
 from odd_collector_aws.adapters.s3.clients.s3_client import S3Client
 from odd_collector_aws.adapters.s3.s3_dataset_service import S3DatasetService
 from odd_collector_aws.domain.plugin import S3Plugin
 from odd_collector_aws.use_cases.s3_dataset_use_case import S3DatasetUseCase
 from odd_collector_aws.use_cases.s3_use_case import S3UseCase
 from odd_collector_aws.utils.create_generator import create_generator
+from odd_collector_sdk.domain.adapter import AbstractAdapter
+from odd_models.models import DataEntityList
+from oddrn_generator.generators import S3Generator
+
 from .logger import logger
 
 
 class Adapter(AbstractAdapter):
     def __init__(self, config: S3Plugin) -> None:
-        self.__datasets = config.datasets
+        try:
+            self.__datasets = config.datasets
 
-        self._oddrn_generator = create_generator(S3Generator, config)
+            self._oddrn_generator = create_generator(S3Generator, config)
 
-        dataset_client = S3DatasetService(S3Client(config))
-        dataset_use_case = S3DatasetUseCase(dataset_client)
+            dataset_client = S3DatasetService(S3Client(config))
+            dataset_use_case = S3DatasetUseCase(dataset_client)
 
-        self.s3_use_case = S3UseCase(dataset_use_case, self._oddrn_generator)
+            self.s3_use_case = S3UseCase(dataset_use_case, self._oddrn_generator)
+        except Exception:
+            logger.debug("Error during initialization adapter", exc_info=True)
 
     def get_data_source_oddrn(self) -> str:
         return self._oddrn_generator.get_data_source_oddrn()

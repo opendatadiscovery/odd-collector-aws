@@ -1,10 +1,11 @@
-from typing import List, Any
+from typing import Any, List
 
 from odd_collector_aws.adapters.s3.domain.dataset import (
-    DATASETS_FN,
     AVAILABLE_FILE_FORMATS,
+    DATASETS_FN,
 )
 from odd_collector_aws.adapters.s3.file_system import FileSystem
+from odd_collector_aws.adapters.s3.logger import logger
 from odd_collector_aws.adapters.s3.mapper.metadata_extractor import (
     FileMetadataExtractor,
     FolderMetadataExtractor,
@@ -15,7 +16,6 @@ from odd_collector_aws.adapters.s3.strategies.fetch_strategy_base import (
 from odd_collector_aws.domain.dataset_config import DatasetConfig
 from odd_collector_aws.errors import InvalidFileFormatWarning
 from odd_collector_aws.utils import get_file_extension
-from odd_collector_aws.adapters.s3.logger import logger
 
 
 class FileStrategy(FetchStrategyBase):
