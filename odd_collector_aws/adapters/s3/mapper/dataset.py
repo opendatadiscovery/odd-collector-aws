@@ -1,3 +1,4 @@
+import re
 from typing import List, Dict, Any
 
 from lark import Lark
@@ -10,6 +11,7 @@ from odd_models.models import (
     DataEntityType,
 )
 from oddrn_generator.generators import S3Generator
+from oddrn_generator.utils import escape
 from pyarrow import Schema
 
 from .s3_field_type_transformer import S3FieldTypeTransformer
@@ -69,12 +71,12 @@ def __parse(field_type: str) -> Dict[str, Any]:
     return field_type_transformer.transform(column_tree)
 
 
-def s3_path_to_name(path: str, joiner: str = ":") -> str:
+def s3_path_to_name(path: str) -> str:
     """
     Remove the bucket name from the path and return the name of the file.
     """
-    without_bucket = path.rstrip("/").split("/")[1:]
-    return joiner.join(without_bucket)
+
+    return escape(re.sub("^[a-zA-z-.\d]*\/", "", path.strip("/"), 1))
 
 
 def map_dataset(
