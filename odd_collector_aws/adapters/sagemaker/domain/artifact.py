@@ -12,8 +12,8 @@ from odd_models.models import (
     DataInput,
 )
 from oddrn_generator import Generator
+from oddrn_generator.utils import escape
 
-from odd_collector_aws.const import S3_PATH_REPLACER
 from odd_collector_aws.domain.to_data_entity import ToDataEntity
 from odd_collector_aws.utils import parse_s3_url
 from .base_sagemaker_entity import BaseSagemakerEntity
@@ -124,7 +124,7 @@ def create_model(uri: str, arn: str):
 
 def create_dummy_dataset_artifact(uri: str, arn: str):
     bucket, key = parse_s3_url(uri)
-    name = key.replace("/", S3_PATH_REPLACER)
+    name = escape(key)
     return DummyDatasetArtifact(Name=name, Uri=uri, Arn=arn, ArtifactType="Dataset")
 
 
