@@ -3,16 +3,16 @@ from odd_collector_aws.aws.aws_client import AwsClient
 from typing import Optional, Iterable, Dict, Any
 from odd_collector_sdk.domain.adapter import AbstractAdapter
 from os import getenv
-from odd_collector_aws.domain.dataset_config import DatasetConfig
 from oddrn_generator.path_models import BasePathsModel
 from oddrn_generator.generators import Generator
-from oddrn_generator.server_models import AWSCloudModel, AbstractServerModel
+from oddrn_generator.server_models import AWSCloudModel
 from odd_collector_aws.domain.plugin import DmsPlugin
 from itertools import chain
+from odd_collector_aws.adapters.dms.mappers.endpoints import get_endpoint_oddrn
 from odd_models.models import DataEntityList, DataEntity, DataEntityType, DataTransformer
 from odd_collector_aws.domain.paginator_config import PaginatorConfig
 from odd_collector_aws.domain.fetch_paginator import fetch_paginator
-from oddrn_generator.generators import MssqlGenerator, S3Generator
+
 
 MAX_RESULTS_FOR_PAGE = 100
 
@@ -57,20 +57,7 @@ def map_dms_task(
 
 
 #
-def get_endpoint_oddrn(endpoint_node: Dict[str, Any], server_obj: AWSCloudModel) -> str:
-    engine_name = endpoint_node.get('EngineName')
-    if engine_name == 'sqlserver':
-        stats = endpoint_node.get('MicrosoftSQLServerSettings')
-        gen = MssqlGenerator(
-            host_settings=f"{stats['ServerName']}:{stats['Port']}", databases=stats['DatabaseName']
-        )
-    elif engine_name == 's3':
-        gen = S3Generator(
-            cloud_settings={"region": server_obj.region, "account": server_obj.account}
-        )
-    else:
-        return 'hello'
-    return gen.get_data_source_oddrn()
+
 
 
 class DMSClient:
@@ -80,18 +67,6 @@ class DMSClient:
 
         self.dms = AwsClient(config).get_client("dms")
         self.account_id = AwsClient(config).get_account_id()
-
-    # def get_endpoint_node(self, endpoint_arn: str) -> dict:
-    #     response = self.dms.describe_endpoints(Filters=[
-    #         {
-    #             'Name': 'endpoint-arn',
-    #             'Values': [
-    #                 endpoint_arn,
-    #             ]
-    #         },
-    #     ],
-    #         Marker='string')
-    #     return response['Endpoints'][0]
 
 
 _config = DmsPlugin(aws_secret_access_key=getenv('aws_secret_access_key'),
