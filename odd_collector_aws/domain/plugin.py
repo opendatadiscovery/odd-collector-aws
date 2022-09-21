@@ -19,6 +19,10 @@ class GluePlugin(AwsPlugin):
     type: Literal["glue"]
 
 
+class DmsPlugin(AwsPlugin):
+    type: Literal["dms"]
+
+
 class DynamoDbPlugin(AwsPlugin):
     type: Literal["dynamodb"]
     exclude_tables: Optional[List[str]] = []
