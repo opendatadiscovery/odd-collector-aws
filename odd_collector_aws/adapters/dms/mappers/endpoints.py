@@ -31,8 +31,9 @@ class EndpointEngine:
     def map_database_with_tables(self, tables: List[str]) -> DataEntity:
         database = self.map_database()
         database.data_entity_group = DataEntityGroup(
-            entities_list=[]
+            entities_list=[self.map_table(table) for table in tables]
         )
+        return database
 
 
 class MssqlEngine(EndpointEngine):
