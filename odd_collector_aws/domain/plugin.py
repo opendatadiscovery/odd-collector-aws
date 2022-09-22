@@ -63,6 +63,7 @@ class KinesisPlugin(AwsPlugin):
 
 PLUGIN_FACTORY: PluginFactory = {
     "athena": AthenaPlugin,
+    "dms": DmsPlugin,
     "dynamodb": DynamoDbPlugin,
     "glue": GluePlugin,
     "kinesis": KinesisPlugin,
