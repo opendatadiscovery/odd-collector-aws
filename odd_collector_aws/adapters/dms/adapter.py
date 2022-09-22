@@ -2,6 +2,7 @@ from typing import Iterable, Dict
 from odd_collector_sdk.domain.adapter import AbstractAdapter
 from odd_collector_aws.domain.plugin import DmsPlugin
 from itertools import chain
+from more_itertools import flatten
 from oddrn_generator.generators import DmsGenerator
 from odd_collector_aws.adapters.dms.mappers.endpoints import engines_map
 from odd_models.models import DataEntityList, DataEntity
@@ -25,14 +26,14 @@ class Adapter(AbstractAdapter):
 
     def get_data_entity_list(self) -> DataEntityList:
         endpoints_entities_dict = self._get_endpoints_entities_arn_dict()
-        tasks_entities = list(chain(
+        tasks_entities = list(flatten(chain(
             self._get_tasks(endpoints_entities_dict),
-        ))
+        )))
         endpoints_entities_values = list(endpoints_entities_dict.values())
 
         return DataEntityList(
             data_source_oddrn=self.get_data_source_oddrn(),
-            items=[*tasks_entities, *endpoints_entities_values],
+            items=[*tasks_entities],
         )
 
     def _get_tasks(self, endpoints_entities_arn_dict: Dict[str, DataEntity]) -> Iterable[DataEntity]:
