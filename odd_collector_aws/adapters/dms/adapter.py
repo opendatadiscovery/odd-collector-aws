@@ -32,7 +32,7 @@ class Adapter(AbstractAdapter):
 
         return DataEntityList(
             data_source_oddrn=self.get_data_source_oddrn(),
-            items=[*tasks_entities, *endpoints_entities_values],
+            items=[*tasks_entities],
         )
 
     def _get_tasks(self, endpoints_entities_arn_dict: Dict[str, DataEntity]) -> Iterable[DataEntity]:
@@ -69,6 +69,6 @@ class Adapter(AbstractAdapter):
             engine_name = endpoint_node.get('EngineName')
             engine = engines_map.get(engine_name)
             endpoint_entity = engine(endpoint_node,
-                                     self._oddrn_generator.server_obj).map_data_entity()
+                                     self._oddrn_generator.server_obj).map_database()
             entities.update({endpoint_arn: endpoint_entity})
         return entities

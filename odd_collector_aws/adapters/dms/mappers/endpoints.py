@@ -15,31 +15,40 @@ class EndpointEngine:
     settings_node_name: str
 
     @abstractmethod
-    def get_oddrn(self) -> str:
+    def get_database_oddrn(self) -> str:
         pass
 
     @abstractmethod
-    def map_data_entity(self) -> DataEntity:
+    def map_database(self) -> DataEntity:
         pass
+
+    def map_table(self, table_name: str):
+        return DataEntity(name=table_name,
+                          oddrn=f"{self.get_database_oddrn()}/tables/{table_name}",
+                          type=DataEntityType.TABLE,
+                          )
+
+    def map_database_with_tables(self, tables: List[str]) -> DataEntity:
+        database = self.map_database()
+        database.data_entity_group = DataEntityGroup(
+            entities_list=[]
+        )
 
 
 class MssqlEngine(EndpointEngine):
     engine_name = 'sqlserver'
     settings_node_name = 'MicrosoftSQLServerSettings'
 
-    def get_oddrn(self) -> str:
+    def get_database_oddrn(self) -> str:
         gen = MssqlGenerator(
             host_settings=f"{self.stats['ServerName']}:{self.stats['Port']}", databases=self.stats['DatabaseName']
         )
         return gen.get_data_source_oddrn()
 
-    def map_data_entity(self) -> DataEntity:
+    def map_database(self) -> DataEntity:
         return DataEntity(name=self.stats['DatabaseName'],
-                          oddrn=self.get_oddrn(),
+                          oddrn=self.get_database_oddrn(),
                           type=DataEntityType.DATABASE_SERVICE,
-                          data_entity_group=DataEntityGroup(
-                              entities_list=[]
-                          )
                           )
 
 
@@ -47,7 +56,7 @@ class S3Engine(EndpointEngine):
     engine_name = 's3'
     settings_node_name = 'S3Settings'
 
-    def get_oddrn(self) -> str:
+    def get_database_oddrn(self) -> str:
         return (
             "//s3/cloud/aws"
             f"/account/{self.server_obj.account}"
@@ -56,9 +65,9 @@ class S3Engine(EndpointEngine):
             f"/folder/{self.stats.get('BucketFolder')}"
         )
 
-    def map_data_entity(self) -> DataEntity:
+    def map_database(self) -> DataEntity:
         return DataEntity(name=self.stats.get('BucketFolder'),
-                          oddrn=self.get_oddrn(),
+                          oddrn=self.get_database_oddrn(),
                           type=DataEntityType.FILE
                           )
 
