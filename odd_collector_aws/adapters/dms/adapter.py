@@ -1,15 +1,13 @@
 from typing import Iterable, Dict
 from odd_collector_sdk.domain.adapter import AbstractAdapter
 from odd_collector_aws.domain.plugin import DmsPlugin
-from itertools import chain
-from more_itertools import flatten
 from oddrn_generator.generators import DmsGenerator
 from odd_collector_aws.adapters.dms.mappers.endpoints import engines_map
 from odd_models.models import DataEntityList, DataEntity
 from odd_collector_aws.domain.paginator_config import PaginatorConfig
 from odd_collector_aws.domain.fetch_paginator import fetch_paginator
 from .client import DMSClient
-from .mappers.tasks import map_dms_task
+from .mappers.tasks import map_dms_task, map_dms_task_run
 
 MAX_RESULTS_FOR_PAGE = 100
 
@@ -26,32 +24,36 @@ class Adapter(AbstractAdapter):
 
     def get_data_entity_list(self) -> DataEntityList:
         endpoints_entities_dict = self._get_endpoints_entities_arn_dict()
-        tasks_entities = list(flatten(chain(
-            self._get_tasks(endpoints_entities_dict),
-        )))
+        tasks = list(self._get_tasks())
         endpoints_entities_values = list(endpoints_entities_dict.values())
+        tasks_entities = [map_dms_task(task, {"oddrn_generator": self._oddrn_generator,
+                                              "endpoints_arn_dict": endpoints_entities_dict,
+                                              }) for task in tasks]
+        tasks_entities_runs = [map_dms_task_run(task, {"oddrn_generator": self._oddrn_generator,
+                                                       "endpoints_arn_dict": endpoints_entities_dict,
+                                                       }) for task in tasks]
 
         return DataEntityList(
             data_source_oddrn=self.get_data_source_oddrn(),
-            items=[*tasks_entities],
+            items=[*endpoints_entities_values],
         )
 
-    def _get_tasks(self, endpoints_entities_arn_dict: Dict[str, DataEntity]) -> Iterable[DataEntity]:
+    def _get_tasks(self) -> Iterable:
         return fetch_paginator(
             PaginatorConfig(
                 op_name="describe_replication_tasks",
                 parameters={},
                 page_size=MAX_RESULTS_FOR_PAGE,
                 list_fetch_key='ReplicationTasks',
-                mapper=map_dms_task,
-                mapper_args={"oddrn_generator": self._oddrn_generator,
-                             "endpoints_arn_dict": endpoints_entities_arn_dict,
-                             },
+                # mapper=map_dms_task,
+                # mapper_args={"oddrn_generator": self._oddrn_generator,
+                #              "endpoints_arn_dict": endpoints_entities_arn_dict,
+                #              },
             ),
             self._dms_client.dms
         )
 
-    def _get_endpoints_nodes(self):
+    def _get_endpoints_nodes(self) -> Iterable:
         paginator = fetch_paginator(
             PaginatorConfig(
                 op_name="describe_endpoints",

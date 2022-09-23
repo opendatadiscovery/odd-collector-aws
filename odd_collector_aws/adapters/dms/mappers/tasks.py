@@ -21,7 +21,7 @@ DMS_TASK_STATUSES: Dict[str, JobRunStatus] = {
 
 def map_dms_task(
         raw_job_data: Dict[str, Any], mapper_args: Dict[str, Any]
-) -> List[DataEntity]:
+) -> DataEntity:
     oddrn_generator: DmsGenerator = mapper_args["oddrn_generator"]
     endpoints_arn_dict: Dict[str, DataEntity] = mapper_args["endpoints_arn_dict"]
     trans = DataTransformer(
@@ -37,6 +37,15 @@ def map_dms_task(
         type=DataEntityType.JOB,
         created_at=raw_job_data.get('ReplicationTaskCreationDate')
     )
+    data_entity_task.data_transformer = trans
+    return data_entity_task
+
+
+def map_dms_task_run(
+        raw_job_data: Dict[str, Any], mapper_args: Dict[str, Any]
+) -> DataEntity:
+    oddrn_generator: DmsGenerator = mapper_args["oddrn_generator"]
+    oddrn_generator.get_oddrn_by_path("tasks", raw_job_data['ReplicationTaskIdentifier'])
     status = DMS_TASK_STATUSES.get(
         raw_job_data["Status"], JobRunStatus.UNKNOWN
     )
@@ -57,5 +66,4 @@ def map_dms_task(
             status=status,
         ),
     )
-    data_entity_task.data_transformer = trans
-    return [data_entity_task, data_entity_task_run]
+    return data_entity_task_run
