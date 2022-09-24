@@ -313,7 +313,7 @@ python-versions = ">=3.8"
 
 [[package]]
 name = "odd-collector-sdk"
-version = "0.3.1"
+version = "0.3.2"
 description = "ODD Collector"
 category = "main"
 optional = false
@@ -681,7 +681,7 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "6522c8a731e485719744a3bbed9e2a16f10aa6d7e10565a36a5c5e545ace1a61"
+content-hash = "cec9473b4dcfec1770361b2c40f003009e0bfbf0f83c398e92682ad1cd68470c"
 
 [metadata.files]
 aiohttp = [
@@ -1058,8 +1058,8 @@ numpy = [
     {file = "numpy-1.23.3.tar.gz", hash = "sha256:51bf49c0cd1d52be0a240aa66f3458afc4b95d8993d2d04f0d91fa60c10af6cd"},
 ]
 odd-collector-sdk = [
-    {file = "odd-collector-sdk-0.3.1.tar.gz", hash = "sha256:75975621ccb521a310505566b7cb9ff7e26908b5ad06eafe64713a916e977778"},
-    {file = "odd_collector_sdk-0.3.1-py3-none-any.whl", hash = "sha256:b1a74613ca37525f3ddd84313db0d1786ab6bf7419e33ec462aecfadd0f9b061"},
+    {file = "odd-collector-sdk-0.3.2.tar.gz", hash = "sha256:23351c2f512ca91ff7a02e1148af2a693b307d83f4a4d24047447a8f3c52213e"},
+    {file = "odd_collector_sdk-0.3.2-py3-none-any.whl", hash = "sha256:3ac813addc8388cd7d072570fde4eb246753ce1912d5b6d276479c2c4ef33742"},
 ]
 odd-models = [
     {file = "odd-models-2.0.4.tar.gz", hash = "sha256:778a2e0a1c104c44e405f55a2de42dae684263b5b2844d79ed552eeeacc315e9"},

@@ -25,17 +25,17 @@ class Adapter(AbstractAdapter):
     def get_data_entity_list(self) -> DataEntityList:
         endpoints_entities_dict = self._get_endpoints_entities_arn_dict()
         tasks = list(self._get_tasks())
-        endpoints_entities_values = list(endpoints_entities_dict.values())
+        # endpoints_entities_values = list(endpoints_entities_dict.values())
         tasks_entities = [map_dms_task(task, {"oddrn_generator": self._oddrn_generator,
                                               "endpoints_arn_dict": endpoints_entities_dict,
                                               }) for task in tasks]
-        tasks_entities_runs = [map_dms_task_run(task, {"oddrn_generator": self._oddrn_generator,
-                                                       "endpoints_arn_dict": endpoints_entities_dict,
-                                                       }) for task in tasks]
+        # tasks_entities_runs = [map_dms_task_run(task, {"oddrn_generator": self._oddrn_generator,
+        #                                                "endpoints_arn_dict": endpoints_entities_dict,
+        #                                                }) for task in tasks]
 
         return DataEntityList(
             data_source_oddrn=self.get_data_source_oddrn(),
-            items=[*endpoints_entities_values],
+            items=[*tasks_entities],
         )
 
     def _get_tasks(self) -> Iterable:

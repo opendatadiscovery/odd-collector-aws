@@ -42,7 +42,7 @@ class MssqlEngine(EndpointEngine):
 
     def get_database_oddrn(self) -> str:
         gen = MssqlGenerator(
-            host_settings=f"{self.stats['ServerName']}:{self.stats['Port']}", databases=self.stats['DatabaseName']
+            host_settings=f"{self.stats['ServerName']}", databases=self.stats['DatabaseName']
         )
         return gen.get_data_source_oddrn()
 
