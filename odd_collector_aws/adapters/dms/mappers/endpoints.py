@@ -1,14 +1,11 @@
 from oddrn_generator.generators import MssqlGenerator
-from typing import Dict, Any, Union, Type, List
+from typing import Dict, Any, Type, List
 from odd_models.models import DataEntity, DataEntityType, DataEntityGroup
-from oddrn_generator.server_models import AWSCloudModel, AbstractServerModel
 from abc import abstractmethod
 
 
 class EndpointEngine:
-    def __init__(self, endpoint_node: Dict[str, Any],
-                 server_obj: Union[AWSCloudModel, AbstractServerModel]):
-        self.server_obj = server_obj
+    def __init__(self, endpoint_node: Dict[str, Any]):
         self.stats = endpoint_node.get(self.settings_node_name)
 
     engine_name: str
@@ -60,10 +57,8 @@ class S3Engine(EndpointEngine):
     def get_database_oddrn(self) -> str:
         return (
             "//s3/cloud/aws"
-            f"/account/{self.server_obj.account}"
-            f"/region/{self.server_obj.region}"
-            f"/bucket/{self.stats.get('BucketName')}"
-            f"/folder/{self.stats.get('BucketFolder')}"
+            f"/buckets/{self.stats.get('BucketName')}"
+            f"/keys/{self.stats.get('BucketFolder')}"
         )
 
     def map_database(self) -> DataEntity:

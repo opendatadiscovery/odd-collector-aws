@@ -7,7 +7,7 @@ from odd_models.models import DataEntityList, DataEntity
 from odd_collector_aws.domain.paginator_config import PaginatorConfig
 from odd_collector_aws.domain.fetch_paginator import fetch_paginator
 from .client import DMSClient
-from .mappers.tasks import map_dms_task, map_dms_task_run
+from .mappers.tasks import map_dms_task
 
 MAX_RESULTS_FOR_PAGE = 100
 
@@ -25,13 +25,9 @@ class Adapter(AbstractAdapter):
     def get_data_entity_list(self) -> DataEntityList:
         endpoints_entities_dict = self._get_endpoints_entities_arn_dict()
         tasks = list(self._get_tasks())
-        # endpoints_entities_values = list(endpoints_entities_dict.values())
         tasks_entities = [map_dms_task(task, {"oddrn_generator": self._oddrn_generator,
                                               "endpoints_arn_dict": endpoints_entities_dict,
                                               }) for task in tasks]
-        # tasks_entities_runs = [map_dms_task_run(task, {"oddrn_generator": self._oddrn_generator,
-        #                                                "endpoints_arn_dict": endpoints_entities_dict,
-        #                                                }) for task in tasks]
 
         return DataEntityList(
             data_source_oddrn=self.get_data_source_oddrn(),
@@ -45,10 +41,6 @@ class Adapter(AbstractAdapter):
                 parameters={},
                 page_size=MAX_RESULTS_FOR_PAGE,
                 list_fetch_key='ReplicationTasks',
-                # mapper=map_dms_task,
-                # mapper_args={"oddrn_generator": self._oddrn_generator,
-                #              "endpoints_arn_dict": endpoints_entities_arn_dict,
-                #              },
             ),
             self._dms_client.dms
         )
@@ -71,7 +63,6 @@ class Adapter(AbstractAdapter):
             endpoint_arn = endpoint_node.get('EndpointArn')
             engine_name = endpoint_node.get('EngineName')
             engine = engines_map.get(engine_name)
-            endpoint_entity = engine(endpoint_node,
-                                     self._oddrn_generator.server_obj).map_database()
+            endpoint_entity = engine(endpoint_node).map_database()
             entities.update({endpoint_arn: endpoint_entity})
         return entities
