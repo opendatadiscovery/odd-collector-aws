@@ -48,6 +48,7 @@ class Adapter(AbstractAdapter):
             try:
                 logger.debug(f"Getting info for: {dataset}")
                 yield from self.s3_use_case.get_data_entities(dataset)
+                logger.debug(f"Getting info for: {dataset}")
             except Exception:
                 logger.error(
                     f"Got unexpected error for {dataset.path}, SKIP object.",

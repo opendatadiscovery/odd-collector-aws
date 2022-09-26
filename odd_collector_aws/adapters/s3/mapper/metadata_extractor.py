@@ -4,6 +4,7 @@ from typing import Tuple
 import pyarrow.dataset as ds
 
 from odd_collector_aws.adapters.s3.file_system import FileSystem
+from odd_collector_aws.adapters.s3.logger import logger
 from odd_collector_aws.utils import parse_s3_url
 
 
@@ -63,10 +64,17 @@ class FolderMetadataExtractor(MetadataExtractor):
 
 class FileMetadataExtractor(MetadataExtractor):
     def extract(self) -> dict:
+        logger.info(f"Parse {self._original_path}")
         bucket, key = parse_s3_url(self._original_path)
+        logger.info(f"Parsed {bucket}/{key}")
+
+        logger.info(f"Count rows")
+        rows = self._dataset.count_rows()
+        logger.info(f"Counted rows {rows}")
+
         return {
             "Format": self._dataset.format.default_extname,
-            "Rows": self._dataset.count_rows(),
+            "Rows": rows,
             "Bucket": bucket,
             "Key": key,
         }
