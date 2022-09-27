@@ -61,12 +61,13 @@ class FolderStrategy(FetchStrategyBase):
 
 def create_s3_dataset_for_file(file_path: str, fs: FileSystem):
     file_ext = get_file_extension(file_path)
-
+    logger.debug("validate")
     validate_file_extension(file_ext)
 
     dataset = fs.get_dataset(file_path, DATASETS_FN[file_ext].format)
+    logger.debug("extract metadata")
     metadata = FileMetadataExtractor(file_path, dataset, fs).extract()
-
+    logger.debug("Metadata extracted")
     return DATASETS_FN[file_ext](
         dataset,
         file_path,
