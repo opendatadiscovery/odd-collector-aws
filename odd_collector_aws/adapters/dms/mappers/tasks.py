@@ -1,7 +1,9 @@
 from odd_models.models import DataEntity, DataEntityType, DataTransformer, JobRunStatus, DataTransformerRun
-from typing import Dict, Any, List
+from typing import Dict, Any
 from datetime import datetime
+from odd_collector_aws.adapters.dms import _keys_to_include_task, _METADATA_SCHEMA_URL_PREFIX
 from oddrn_generator.generators import DmsGenerator
+from .metadata import create_metadata_extension_list
 
 DMS_TASK_STATUSES: Dict[str, JobRunStatus] = {
     "creating": JobRunStatus.UNKNOWN,
@@ -38,6 +40,8 @@ def map_dms_task(
         created_at=raw_job_data.get('ReplicationTaskCreationDate')
     )
     data_entity_task.data_transformer = trans
+    data_entity_task.metadata = create_metadata_extension_list(_METADATA_SCHEMA_URL_PREFIX, raw_job_data,
+                                                               _keys_to_include_task)
     return data_entity_task
 
 
