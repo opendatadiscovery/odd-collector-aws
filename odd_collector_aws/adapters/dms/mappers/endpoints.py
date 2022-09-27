@@ -20,10 +20,11 @@ class EndpointEngine:
         pass
 
     def map_table(self, table_name: str):
-        return DataEntity(name=table_name,
-                          oddrn=f"{self.get_database_oddrn()}/tables/{table_name}",
-                          type=DataEntityType.TABLE,
-                          )
+        return DataEntity(
+            name=table_name,
+            oddrn=f"{self.get_database_oddrn()}/tables/{table_name}",
+            type=DataEntityType.TABLE,
+        )
 
     def map_database_with_tables(self, tables: List[str]) -> DataEntity:
         database = self.map_database()
@@ -34,25 +35,27 @@ class EndpointEngine:
 
 
 class MssqlEngine(EndpointEngine):
-    engine_name = 'sqlserver'
-    settings_node_name = 'MicrosoftSQLServerSettings'
+    engine_name = "sqlserver"
+    settings_node_name = "MicrosoftSQLServerSettings"
 
     def get_database_oddrn(self) -> str:
         gen = MssqlGenerator(
-            host_settings=f"{self.stats['ServerName']}", databases=self.stats['DatabaseName']
+            host_settings=f"{self.stats['ServerName']}",
+            databases=self.stats["DatabaseName"],
         )
         return gen.get_data_source_oddrn()
 
     def map_database(self) -> DataEntity:
-        return DataEntity(name=self.stats['DatabaseName'],
-                          oddrn=self.get_database_oddrn(),
-                          type=DataEntityType.DATABASE_SERVICE,
-                          )
+        return DataEntity(
+            name=self.stats["DatabaseName"],
+            oddrn=self.get_database_oddrn(),
+            type=DataEntityType.DATABASE_SERVICE,
+        )
 
 
 class S3Engine(EndpointEngine):
-    engine_name = 's3'
-    settings_node_name = 'S3Settings'
+    engine_name = "s3"
+    settings_node_name = "S3Settings"
 
     def get_database_oddrn(self) -> str:
         return (
@@ -62,17 +65,14 @@ class S3Engine(EndpointEngine):
         )
 
     def map_database(self) -> DataEntity:
-        return DataEntity(name=self.stats.get('BucketFolder'),
-                          oddrn=self.get_database_oddrn(),
-                          type=DataEntityType.FILE
-                          )
+        return DataEntity(
+            name=self.stats.get("BucketFolder"),
+            oddrn=self.get_database_oddrn(),
+            type=DataEntityType.FILE,
+        )
 
 
-engines: List[Type[EndpointEngine]] = [
-    MssqlEngine,
-    S3Engine
-]
+engines: List[Type[EndpointEngine]] = [MssqlEngine, S3Engine]
 engines_map: Dict[str, Type[EndpointEngine]] = {
     engine.engine_name: engine for engine in engines
-
 }

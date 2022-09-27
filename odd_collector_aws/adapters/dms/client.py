@@ -3,7 +3,6 @@ from odd_collector_aws.aws.aws_client import AwsClient
 
 
 class DMSClient:
-
     def __init__(self, config: AwsPlugin):
         self._config = config
 

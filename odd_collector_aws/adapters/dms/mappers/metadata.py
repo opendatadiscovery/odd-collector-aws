@@ -3,7 +3,7 @@ from typing import List, Dict, Any
 
 
 def create_metadata_extension_list(
-        schema_url: str, metadata: Dict[str, Any], keys_to_include: List[str]
+    schema_url: str, metadata: Dict[str, Any], keys_to_include: List[str]
 ) -> List[MetadataExtension]:
     return [
         MetadataExtension(

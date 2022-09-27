@@ -22,4 +22,3 @@ def fetch_paginator(conf: PaginatorConfig, client: BaseClient) -> Iterable:
             break
 
         token = sdk_response.resume_token
-
