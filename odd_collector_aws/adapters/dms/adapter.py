@@ -72,7 +72,8 @@ class Adapter(AbstractAdapter):
         for endpoint_node in self._get_endpoints_nodes():
             endpoint_arn = endpoint_node.get("EndpointArn")
             engine_name = endpoint_node.get("EngineName")
-            engine = engines_map.get(engine_name)
-            endpoint_entity = engine(endpoint_node).map_database()
-            entities.update({endpoint_arn: endpoint_entity})
+            if engine_name in engines_map.keys():
+                engine = engines_map.get(engine_name)
+                endpoint_entity = engine(endpoint_node).map_database()
+                entities.update({endpoint_arn: endpoint_entity})
         return entities

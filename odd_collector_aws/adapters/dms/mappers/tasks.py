@@ -30,13 +30,16 @@ DMS_TASK_STATUSES: Dict[str, JobRunStatus] = {
 
 
 def map_dms_task(
-    raw_job_data: Dict[str, Any], mapper_args: Dict[str, Any]
+        raw_job_data: Dict[str, Any], mapper_args: Dict[str, Any]
 ) -> DataEntity:
     oddrn_generator: DmsGenerator = mapper_args["oddrn_generator"]
     endpoints_arn_dict: Dict[str, DataEntity] = mapper_args["endpoints_arn_dict"]
+
+    input_endpoint_entity = endpoints_arn_dict.get(raw_job_data.get("SourceEndpointArn"))
+    output_endpoint_entity = endpoints_arn_dict.get(raw_job_data.get("TargetEndpointArn"))
     trans = DataTransformer(
-        inputs=[endpoints_arn_dict.get(raw_job_data.get("SourceEndpointArn")).oddrn],
-        outputs=[endpoints_arn_dict.get(raw_job_data.get("TargetEndpointArn")).oddrn],
+        inputs=[] if input_endpoint_entity is None else [input_endpoint_entity.oddrn],
+        outputs=[] if output_endpoint_entity is None else [output_endpoint_entity.oddrn],
     )
     data_entity_task = DataEntity(
         oddrn=oddrn_generator.get_oddrn_by_path(
@@ -55,7 +58,7 @@ def map_dms_task(
 
 
 def map_dms_task_run(
-    raw_job_data: Dict[str, Any], mapper_args: Dict[str, Any]
+        raw_job_data: Dict[str, Any], mapper_args: Dict[str, Any]
 ) -> DataEntity:
     oddrn_generator: DmsGenerator = mapper_args["oddrn_generator"]
     oddrn_generator.get_oddrn_by_path(
