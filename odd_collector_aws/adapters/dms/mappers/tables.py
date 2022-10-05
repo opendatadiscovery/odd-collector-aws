@@ -132,5 +132,8 @@ class EntitiesExtractor:
                 include_oddrns += oddrns
             else:
                 exclude_oddrns += oddrns
-        return list(set(
-            [oddrn for oddrn in all_tables_oddrns if (oddrn in include_oddrns) and (oddrn not in exclude_oddrns)]))
+
+        oddrns_after_exclusion = [oddrn for oddrn in all_tables_oddrns if oddrn not in exclude_oddrns]
+        if len(include_oddrns) == 0:
+            return oddrns_after_exclusion
+        return [oddrn for oddrn in include_oddrns if oddrn in oddrns_after_exclusion]
