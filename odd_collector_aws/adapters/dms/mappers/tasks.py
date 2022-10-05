@@ -13,6 +13,11 @@ from odd_collector_aws.adapters.dms import (
 )
 from oddrn_generator.generators import DmsGenerator
 from .metadata import create_metadata_extension_list
+from json import loads
+from .tables import EntitiesExtractor
+from .endpoints import engines_factory
+import os
+from yaml import safe_load
 
 DMS_TASK_STATUSES: Dict[str, JobRunStatus] = {
     "creating": JobRunStatus.UNKNOWN,
@@ -29,17 +34,33 @@ DMS_TASK_STATUSES: Dict[str, JobRunStatus] = {
 }
 
 
+def get_platform_host_url() -> str:
+    config_file_name = "collector_config.yaml"
+    path = os.path.dirname(os.path.abspath(config_file_name)) + '/' + config_file_name
+    with open(path) as f:
+        config_dict: Dict[str, Any] = safe_load(f)
+    return config_dict['platform_host_url']
+
+
 def map_dms_task(
         raw_job_data: Dict[str, Any], mapper_args: Dict[str, Any]
 ) -> DataEntity:
     oddrn_generator: DmsGenerator = mapper_args["oddrn_generator"]
-    endpoints_arn_dict: Dict[str, DataEntity] = mapper_args["endpoints_arn_dict"]
-
-    input_endpoint_entity = endpoints_arn_dict.get(raw_job_data.get("SourceEndpointArn"))
-    output_endpoint_entity = endpoints_arn_dict.get(raw_job_data.get("TargetEndpointArn"))
+    endpoints_arn_dict: Dict[str, Dict[str, Any]] = mapper_args["endpoints_arn_dict"]
+    rules_nodes = loads(raw_job_data['TableMappings'])['rules']
+    input_endpoint_node = endpoints_arn_dict.get(raw_job_data.get("SourceEndpointArn"))
+    input_engine_name = input_endpoint_node.get('EngineName')
+    input_endpoint_engine_cls = engines_factory.get(input_engine_name)
+    if input_endpoint_engine_cls is None:
+        inputs = []
+    else:
+        input_endpoint_engine = input_endpoint_engine_cls(input_endpoint_node)
+        input_extractor = EntitiesExtractor(rules_nodes, get_platform_host_url(), input_endpoint_engine)
+        inputs = input_extractor.get_oddrns_list()
+    # output_endpoint_entity = endpoints_arn_dict.get(raw_job_data.get("TargetEndpointArn"))
     trans = DataTransformer(
-        inputs=[] if input_endpoint_entity is None else [input_endpoint_entity.oddrn],
-        outputs=[] if output_endpoint_entity is None else [output_endpoint_entity.oddrn],
+        inputs=inputs,
+        outputs=[]
     )
     data_entity_task = DataEntity(
         oddrn=oddrn_generator.get_oddrn_by_path(

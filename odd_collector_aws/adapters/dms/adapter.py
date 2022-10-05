@@ -1,9 +1,8 @@
-from typing import Iterable, Dict
+from typing import Iterable, Dict, Any
 from odd_collector_sdk.domain.adapter import AbstractAdapter
 from odd_collector_aws.domain.plugin import DmsPlugin
 from oddrn_generator.generators import DmsGenerator
-from odd_collector_aws.adapters.dms.mappers.endpoints import engines_map
-from odd_models.models import DataEntityList, DataEntity
+from odd_models.models import DataEntityList
 from odd_collector_aws.domain.paginator_config import PaginatorConfig
 from odd_collector_aws.domain.fetch_paginator import fetch_paginator
 from .client import DMSClient
@@ -26,14 +25,14 @@ class Adapter(AbstractAdapter):
         return self._oddrn_generator.get_data_source_oddrn()
 
     def get_data_entity_list(self) -> DataEntityList:
-        endpoints_entities_dict = self._get_endpoints_entities_arn_dict()
+        endpoints_nodes = self._get_endpoints_nodes_arn_dict()
         tasks = list(self._get_tasks())
         tasks_entities = [
             map_dms_task(
                 task,
                 {
                     "oddrn_generator": self._oddrn_generator,
-                    "endpoints_arn_dict": endpoints_entities_dict,
+                    "endpoints_arn_dict": endpoints_nodes,
                 },
             )
             for task in tasks
@@ -67,13 +66,6 @@ class Adapter(AbstractAdapter):
         )
         return paginator
 
-    def _get_endpoints_entities_arn_dict(self) -> Dict[str, DataEntity]:
-        entities: Dict[str, DataEntity] = {}
-        for endpoint_node in self._get_endpoints_nodes():
-            endpoint_arn = endpoint_node.get("EndpointArn")
-            engine_name = endpoint_node.get("EngineName")
-            if engine_name in engines_map.keys():
-                engine = engines_map.get(engine_name)
-                endpoint_entity = engine(endpoint_node).map_database()
-                entities.update({endpoint_arn: endpoint_entity})
-        return entities
+    def _get_endpoints_nodes_arn_dict(self) -> Dict[str, Any]:
+        endpoint_nodes = self._get_endpoints_nodes()
+        return {endpoint_node.get('EndpointArn'): endpoint_node for endpoint_node in endpoint_nodes}
