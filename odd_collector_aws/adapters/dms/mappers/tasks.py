@@ -5,7 +5,7 @@ from odd_models.models import (
     JobRunStatus,
     DataTransformerRun,
 )
-from typing import Dict, Any
+from typing import Dict, Any, Type, List, Union
 from datetime import datetime
 from odd_collector_aws.adapters.dms import (
     _keys_to_include_task,
@@ -15,7 +15,7 @@ from oddrn_generator.generators import DmsGenerator
 from .metadata import create_metadata_extension_list
 from json import loads
 from .tables import EntitiesExtractor
-from .endpoints import engines_factory
+from .endpoints import engines_factory, EndpointEngine
 import os
 from yaml import safe_load
 
@@ -34,12 +34,56 @@ DMS_TASK_STATUSES: Dict[str, JobRunStatus] = {
 }
 
 
-def get_platform_host_url() -> str:
-    config_file_name = "collector_config.yaml"
-    path = os.path.dirname(os.path.abspath(config_file_name)) + '/' + config_file_name
-    with open(path) as f:
-        config_dict: Dict[str, Any] = safe_load(f)
-    return config_dict['platform_host_url']
+class IOTransformer:
+    def __init__(self, endpoints_arn_dict: Dict[str, Dict[str, Any]],
+                 raw_job_data: Dict[str, Any], factory: Dict[str, Type[EndpointEngine]],
+                 rules_nodes: List[Dict[str, Any]]
+                 ):
+        self.rules_nodes = rules_nodes
+        self.factory = factory
+        self.raw_job_data = raw_job_data
+        self.endpoints_arn_dict = endpoints_arn_dict
+
+    @property
+    def __input_endpoint_node(self) -> Dict[str, Any]:
+        return self.__get_endpoint_node('SourceEndpointArn')
+
+    @property
+    def __output_endpoint_node(self) -> Dict[str, Any]:
+        return self.__get_endpoint_node('TargetEndpointArn')
+
+    def __get_endpoint_node(self, arn_node_name: str) -> Dict[str, Any]:
+        return self.endpoints_arn_dict.get(self.raw_job_data.get(arn_node_name))
+
+    @staticmethod
+    def __get_platform_host_url() -> str:
+        config_file_name = "collector_config.yaml"
+        path = os.path.dirname(os.path.abspath(config_file_name)) + '/' + config_file_name
+        with open(path) as f:
+            config_dict: Dict[str, Any] = safe_load(f)
+        return config_dict['platform_host_url']
+
+    @property
+    def __platform_host_url(self):
+        return self.__get_platform_host_url()
+
+    def __find_endpoint_engine_cls(self, endpoint_node: Dict[str, Any]) -> Union[Type[EndpointEngine], None]:
+        engine_name = endpoint_node.get('EngineName')
+        return self.factory.get(engine_name)
+
+    def __extract_oddrns(self, endpoint_node: Dict[str, Any]) -> List[str]:
+        endpoint_engine_cls = self.__find_endpoint_engine_cls(endpoint_node)
+        if endpoint_engine_cls is None:
+            return []
+        endpoint_engine = endpoint_engine_cls(endpoint_node)
+        extractor = EntitiesExtractor(self.rules_nodes, self.__get_platform_host_url(), endpoint_engine)
+        return extractor.get_oddrns_list()
+
+    def extract_input_oddrns(self):
+        return self.__extract_oddrns(self.__input_endpoint_node)
+
+    def extract_output_oddrns(self):
+        return self.__extract_oddrns(self.__output_endpoint_node)
 
 
 def map_dms_task(
@@ -47,20 +91,13 @@ def map_dms_task(
 ) -> DataEntity:
     oddrn_generator: DmsGenerator = mapper_args["oddrn_generator"]
     endpoints_arn_dict: Dict[str, Dict[str, Any]] = mapper_args["endpoints_arn_dict"]
-    rules_nodes = loads(raw_job_data['TableMappings'])['rules']
-    input_endpoint_node = endpoints_arn_dict.get(raw_job_data.get("SourceEndpointArn"))
-    input_engine_name = input_endpoint_node.get('EngineName')
-    input_endpoint_engine_cls = engines_factory.get(input_engine_name)
-    if input_endpoint_engine_cls is None:
-        inputs = []
-    else:
-        input_endpoint_engine = input_endpoint_engine_cls(input_endpoint_node)
-        input_extractor = EntitiesExtractor(rules_nodes, get_platform_host_url(), input_endpoint_engine)
-        inputs = input_extractor.get_oddrns_list()
-    # output_endpoint_entity = endpoints_arn_dict.get(raw_job_data.get("TargetEndpointArn"))
+    rules_nodes: List[Dict[str, Any]] = loads(raw_job_data['TableMappings'])['rules']
+
+    io_transformer = IOTransformer(endpoints_arn_dict, raw_job_data, engines_factory, rules_nodes)
+
     trans = DataTransformer(
-        inputs=inputs,
-        outputs=[]
+        inputs=io_transformer.extract_input_oddrns(),
+        outputs=io_transformer.extract_output_oddrns()
     )
     data_entity_task = DataEntity(
         oddrn=oddrn_generator.get_oddrn_by_path(
