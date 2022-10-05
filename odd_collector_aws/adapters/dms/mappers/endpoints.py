@@ -62,14 +62,28 @@ class MssqlEngine(JdbcEngine):
 class S3Engine(EndpointEngine):
     engine_name = "s3"
     settings_node_name = "S3Settings"
-    schemas_path_name = 'buckets'
-    tables_path_name = 'keys'
+    """
+    //s3/cloud/aws/buckets/dms-bucket-prov/keys/folder_for_anotherpausedtask\\test_schema\\another_table
+    """
 
     def get_generator(self) -> Generator:
         return S3Generator()
 
+    @property
+    def source_oddrn(self):
+        return f"//s3/cloud/aws/buckets/{self.stats.get('BucketName')}/keys/{self.stats.get('BucketFolder')}"
 
-engines: List[Type[EndpointEngine]] = [MssqlEngine]
+    def get_oddrn_for_schema_name(self, generator: Generator, schema_name: str) -> str:
+        return f"{self.source_oddrn}\\{schema_name}"
+
+    def get_oddrn_for_table_schema_names(self, generator: Generator, schema_name: str, table_name: str) -> str:
+        return f"{self.source_oddrn}\\{schema_name}\\{table_name}"
+
+    def extend_schema_oddrn_with_table_name(self, schema_oddrn: str, table_name: str) -> str:
+        return f"{schema_oddrn}\\{table_name}"
+
+
+engines: List[Type[EndpointEngine]] = [MssqlEngine, S3Engine]
 engines_factory: Dict[str, Type[EndpointEngine]] = {
     engine.engine_name: engine for engine in engines
 }
