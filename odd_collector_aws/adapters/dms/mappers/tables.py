@@ -19,9 +19,8 @@ class SelectionMappingRule:
 class EntitiesExtractor:
     def __init__(self, rules_nodes: List[Dict[str, Any]],
                  platform_host_url: str, endpoint_engine: EndpointEngine):
-        self.deg_path_name = endpoint_engine.schemas_path_name
-        self.tables_path_name = endpoint_engine.tables_path_name
-        self.oddrn_generator = endpoint_engine.get_generator()
+
+        self.endpoint_engine = endpoint_engine
         self.platform_host_url = platform_host_url
         self.rules_nodes = rules_nodes
 
@@ -55,10 +54,9 @@ class EntitiesExtractor:
         """
         returns one table from one schema
         """
-        gen = copy.copy(self.oddrn_generator)
-        gen.set_oddrn_paths(**{self.deg_path_name: schema_name, self.tables_path_name: table_name})
-        table_oddrn = gen.get_oddrn_by_path(self.tables_path_name)
-        schema_oddrn = gen.get_oddrn_by_path(self.deg_path_name)
+        gen = copy.copy(self.endpoint_engine.get_generator())
+        table_oddrn = self.endpoint_engine.get_oddrn_for_table_schema_names(gen, schema_name, table_name)
+        schema_oddrn = self.endpoint_engine.get_oddrn_for_schema_name(gen, schema_name)
         accum = []
         tables_oddrns_in_platform = self.__extract_tables_oddrns_from_items(schema_oddrn, accum)
         if table_oddrn in tables_oddrns_in_platform:
@@ -70,9 +68,9 @@ class EntitiesExtractor:
         returns all tables from one schema
 
         """
-        gen = copy.copy(self.oddrn_generator)
-        gen.set_oddrn_paths(**{self.deg_path_name: schema_name})
-        schema_oddrn = gen.get_oddrn_by_path(self.deg_path_name)
+        gen = copy.copy(self.endpoint_engine.get_generator())
+        gen.set_oddrn_paths(**{self.endpoint_engine.schemas_path_name: schema_name})
+        schema_oddrn = self.endpoint_engine.get_oddrn_for_schema_name(gen, schema_name)
         accum = []
         tables_oddrns_in_platform = self.__extract_tables_oddrns_from_items(schema_oddrn, accum)
         return tables_oddrns_in_platform
@@ -82,7 +80,7 @@ class EntitiesExtractor:
         returns one table with equal name from all schemas
         """
         tables_in_platform = self.__all_strategy()
-        gen = copy.copy(self.oddrn_generator)
+        gen = copy.copy(self.endpoint_engine.get_generator())
         db_deg_oddrn = gen.get_data_source_oddrn()
         items = self.__request_items_by_deg(db_deg_oddrn)
         schemas_oddrns_in_platform: List[str] = []
@@ -94,7 +92,7 @@ class EntitiesExtractor:
 
         tables_oddrns_to_return: List[str] = []
         for schema_oddrn in schemas_oddrns_in_platform:
-            table_oddrn = f'{schema_oddrn}/{self.tables_path_name}/{table_name}'
+            table_oddrn = self.endpoint_engine.extend_schema_oddrn_with_table_name(schema_oddrn, table_name)
             if table_oddrn in tables_in_platform:
                 tables_oddrns_to_return.append(table_oddrn)
 
@@ -105,7 +103,7 @@ class EntitiesExtractor:
 
         returns all tables from all schemas
         """
-        gen = copy.copy(self.oddrn_generator)
+        gen = copy.copy(self.endpoint_engine.get_generator())
         db_deg_oddrn = gen.get_data_source_oddrn()
         accum = []
         tables_oddrns_in_platform = self.__extract_tables_oddrns_from_items(db_deg_oddrn, accum)
