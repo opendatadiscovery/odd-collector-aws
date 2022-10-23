@@ -84,34 +84,34 @@ jobs:
         with:
           context: .
           push: true
-          tags: '["ghcr.io/opendatadiscovery/odd-collector-aws:${{needs.version.outputs.version}}"]'
+          tags: ${{REGISTRY}}/${{IMAGE_NAME}}:${{needs.version.outputs.version}}
           labels: ${{ steps.meta.outputs.labels }}
-#
-#    commit_version:
-#      needs: version
-#      name: 'Commit project version to github'
-#      runs-on: ubuntu-latest
-#
-#      steps:
-#        - name: Checkout repository
-#          uses: actions/checkout@v2
-#
-#        - name: Install Poetry
-#          uses: snok/install-poetry@v1
-#          with:
-#            virtualenvs-create: false
-#
-#        - name: Patch package version
-#          run: poetry version ${{needs.version.outputs.version}}
-#
-#        - name: Update repository with up-to-date submodules and version
-#            run: |
-#              git config --global user.email "opendatadiscovery-bot@provectus.com"
-#              git config --global user.name "OpenDataDiscovery Bot"
-#              if [ -n "$(git status --porcelain)" ]
-#              then
-#                git add .
-#                git commit -m "chore:bump package version"
-#                git push origin main
-#              fi
+
+  commit_version:
+    needs: version
+    name: 'Commit project version to github'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: false
+
+      - name: Patch package version
+        run: poetry version ${{needs.version.outputs.version}}
+
+      - name: Update repository with up-to-date submodules and version
+          run: |
+            git config --global user.email "opendatadiscovery-bot@provectus.com"
+            git config --global user.name "OpenDataDiscovery Bot"
+            if [ -n "$(git status --porcelain)" ]
+            then
+              git add .
+              git commit -m "chore:bump package version"
+              git push origin main
+            fi
 
