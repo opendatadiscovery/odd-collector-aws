@@ -1,11 +1,10 @@
 from typing import Dict, Type
 
 import pyarrow.dataset as ds
-from oddrn_generator.generators import S3Generator
-
 from odd_collector_aws.adapters.s3.mapper.dataset import map_dataset
 from odd_collector_aws.domain.to_data_entity import ToDataEntity
 from odd_collector_aws.utils import parse_s3_url
+from oddrn_generator.generators import S3Generator
 
 
 class S3Dataset(ToDataEntity):
@@ -50,7 +49,9 @@ class S3Dataset(ToDataEntity):
 
     @property
     def rows_number(self):
-        return self._dataset.count_rows()
+        return None
+        # Performance issue
+        # return self._dataset.count_rows()
 
     @property
     def metadata(self):
