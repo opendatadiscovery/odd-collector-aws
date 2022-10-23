@@ -18,7 +18,7 @@ if __name__ == "__main__":
         loop = asyncio.get_event_loop()
 
         cur_dirname = path.dirname(path.realpath(__file__))
-        config_path = path.join(cur_dirname, "../collector_config.yaml")
+        config_path = os.getenv("CONFIG_PATH", path.join(cur_dirname, "../collector_config.yaml"))
         root_package = "odd_collector_aws.adapters"
 
         collector = Collector(config_path, root_package, PLUGIN_FACTORY)
