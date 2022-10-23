@@ -105,7 +105,7 @@ jobs:
         run: poetry version ${{needs.version.outputs.version}}
 
       - name: Update repository with up-to-date submodules and version
-          run: |
+        run: |
             git config --global user.email "opendatadiscovery-bot@provectus.com"
             git config --global user.name "OpenDataDiscovery Bot"
             if [ -n "$(git status --porcelain)" ]
