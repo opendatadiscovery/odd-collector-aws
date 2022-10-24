@@ -113,5 +113,7 @@ jobs:
               git add .
               git commit -m "chore:bump package version"
               git push origin main
+              git tag ${{needs.version.outputs.version}}
+              git push origin ${{needs.version.outputs.version}}
             fi
 
