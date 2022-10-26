@@ -49,9 +49,9 @@ class S3Dataset(ToDataEntity):
 
     @property
     def rows_number(self):
-        return None
+        # return None
         # Performance issue
-        # return self._dataset.count_rows()
+        return self._dataset.count_rows()
 
     @property
     def metadata(self):
