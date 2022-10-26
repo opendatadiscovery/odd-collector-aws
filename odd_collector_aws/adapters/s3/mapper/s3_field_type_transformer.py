@@ -1,4 +1,4 @@
-from lark import Transformer, Token
+from lark import Token, Transformer
 
 
 class S3FieldTypeTransformer(Transformer):
@@ -46,3 +46,9 @@ class S3FieldTypeTransformer(Transformer):
 
     def list_type(self, items):
         return {"type": "list", "children": items}
+
+    def timestamp_type(self, items):
+        if not len(items):
+            return {"type": "timestamp"}
+
+        return {"type": "timestamp", "logical_type": f"timestamp[{items[0].value}]"}

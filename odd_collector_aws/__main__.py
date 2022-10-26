@@ -17,9 +17,7 @@ if __name__ == "__main__":
     try:
         loop = asyncio.get_event_loop()
 
-        config_path = Path().cwd() / os.getenv(
-            "CONFIG_PATH", "../collector_config.yaml"
-        )
+        config_path = Path().cwd() / os.getenv("CONFIG_PATH", "collector_config.yaml")
 
         root_package = "odd_collector_aws.adapters"
 
@@ -31,5 +29,5 @@ if __name__ == "__main__":
 
         asyncio.get_event_loop().run_forever()
     except Exception as e:
-        logger.error(e)
+        logger.exception(e)
         asyncio.get_event_loop().stop()

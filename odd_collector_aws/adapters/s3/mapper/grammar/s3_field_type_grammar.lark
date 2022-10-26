@@ -1,4 +1,4 @@
-FIELD_NAME: ("A".."z" | "1".."9" | "-" | "_")+
+FIELD_NAME: (WORD | "1".."9" | "-" | "_")+
 
 NUMBER: ("0" | "1".."9" ("0".."9")*)
 
@@ -17,9 +17,6 @@ SIMPLE_TYPE: "int8"i
         | "float64"i
         | "time32"i
         | "time64"i
-        | "timestamp"i
-        | "timestamp[s]"i
-        | "timestamp[us]"i
         | "date32"i
         | "date32[day]"i
         | "date64"i
@@ -47,6 +44,7 @@ type: SIMPLE_TYPE
     | map_type
     | list_type
     | dictionary_type
+    | timestamp_type
 
 field_definition: FIELD_NAME ":" type
 
@@ -64,5 +62,8 @@ map_type: "map"i "<" type "," type ">"
 
 list_type: "list"i "<item:" type ">"
 
+timestamp_type: "timestamp"i ["[" WORD "]"]
+
 %import common.WS
+%import common.WORD
 %ignore WS

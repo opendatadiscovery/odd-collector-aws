@@ -1,14 +1,16 @@
+import logging
 import re
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
+from funcy import lflatten
 from lark import Lark
 from odd_models.models import (
-    DataSetField,
-    Type,
-    DataSetFieldType,
     DataEntity,
-    DataSet,
     DataEntityType,
+    DataSet,
+    DataSetField,
+    DataSetFieldType,
+    Type,
 )
 from oddrn_generator.generators import S3Generator
 from oddrn_generator.utils import escape
@@ -39,7 +41,6 @@ TYPE_MAP: Dict[str, Type] = {
     "time32": Type.TYPE_TIME,
     "time64": Type.TYPE_TIME,
     "timestamp": Type.TYPE_DATETIME,
-    "timestamp[s]": Type.TYPE_DATETIME,
     "date32": Type.TYPE_DATETIME,
     "date32[day]": Type.TYPE_DATETIME,
     "date64": Type.TYPE_DATETIME,
@@ -59,6 +60,7 @@ TYPE_MAP: Dict[str, Type] = {
     "double": Type.TYPE_NUMBER,
     "bool": Type.TYPE_BOOLEAN,
     "dictionary": Type.TYPE_STRUCT,
+    "unknown": Type.TYPE_UNKNOWN,
 }
 field_type_transformer = S3FieldTypeTransformer()
 parser = Lark.open(
@@ -67,8 +69,13 @@ parser = Lark.open(
 
 
 def __parse(field_type: str) -> Dict[str, Any]:
-    column_tree = parser.parse(field_type)
-    return field_type_transformer.transform(column_tree)
+    try:
+        column_tree = parser.parse(field_type)
+        return field_type_transformer.transform(column_tree)
+    except Exception as exc:
+        logging.warning(f"Could not map field type: {field_type}")
+        logging.debug(exc, exc_info=True)
+        return {"type": "unknown", "logical_type": field_type}
 
 
 def s3_path_to_name(path: str) -> str:
@@ -117,8 +124,9 @@ def map_column(
     is_key: bool = None,
     is_value: bool = None,
 ) -> List[DataSetField]:
-    result = []
+    result: list = []
     ds_type = type_parsed["type"]
+    logical_type = str(type_parsed.get("logical_type", ds_type))
     name = (
         column_name
         if column_name is not None
@@ -139,7 +147,7 @@ def map_column(
             type=TYPE_MAP.get(
                 ds_type, Type.TYPE_UNKNOWN
             ),  # TYPE_MAP.get(str(field.type), TYPE_MAP.get(type(field.type), Type.TYPE_UNKNOWN)),
-            logical_type=str(ds_type),
+            logical_type=logical_type,
             is_nullable=True,
         ),
         is_key=bool(is_key),
@@ -194,16 +202,8 @@ def map_column(
 
 
 def map_columns(schema: Schema, oddrn_gen: S3Generator) -> List[DataSetField]:
-    flat_list = []
-    for i in range(len(schema)):
-        flat_list.extend(
-            iter(
-                map_column(
-                    oddrn_gen=oddrn_gen,
-                    type_parsed=__parse(str(schema.field(i).type)),
-                    column_name=schema.field(i).name,
-                )
-            )
-        )
+    columns = [
+        map_column(oddrn_gen, __parse(str(field.type)), field.name) for field in schema
+    ]
 
-    return flat_list
+    return lflatten(columns)
