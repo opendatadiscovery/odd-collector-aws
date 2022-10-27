@@ -7,7 +7,7 @@ plugins:
     aws_secret_access_key:
     aws_access_key_id:
     aws_region:
-    aws_secret_token:
+    aws_session_token:
     datasets:
       - bucket: bucket_name/
         path: path/
