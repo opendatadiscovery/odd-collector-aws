@@ -24,9 +24,9 @@ class EntitiesExtractor:
         self.platform_host_url = platform_host_url
         self.rules_nodes = rules_nodes
 
-    def __request_items_by_deg(self, deg_oddrn: str) -> List[Dict[str, str]]:
-        url = f'{self.platform_host_url}/ingestion/dataentities'
-        params = {"deg_oddrn": deg_oddrn}
+    def __request_items_by_deg(self, oddrn: str) -> List[Dict[str, str]]:
+        url = f'{self.platform_host_url}/ingestion/entities/degs/children'
+        params = {"oddrn": oddrn}
         resp = requests.get(url=url, params=params)
         return loads(resp.content)['items']
 
