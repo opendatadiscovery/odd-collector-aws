@@ -1,4 +1,11 @@
-from oddrn_generator.generators import MssqlGenerator, Generator, S3Generator
+from oddrn_generator.generators import (
+    MssqlGenerator,
+    Generator,
+    S3Generator,
+    MysqlGenerator,
+    PostgresqlGenerator,
+    MongoGenerator,
+)
 from typing import Dict, Any, Type, List
 from abc import abstractmethod
 
@@ -46,6 +53,58 @@ class JdbcEngine(EndpointEngine):
         return f"{schema_oddrn}/{self.tables_path_name}/{table_name}"
 
 
+class MongodbEngine(JdbcEngine):
+    engine_name = "mongodb"
+    settings_node_name = "MongoDbSettings"
+    schemas_path_name = 'schemas'
+    tables_path_name = 'collections'
+
+    def get_generator(self) -> Generator:
+        return MongoGenerator(
+            host_settings=f"{self.stats['ServerName']}",
+            databases=self.stats["DatabaseName"],
+        )
+
+
+class MysqlEngine(JdbcEngine):
+    engine_name = "mysql"
+    settings_node_name = "MySQLSettings"
+    schemas_path_name = 'schemas'
+    tables_path_name = 'tables'
+
+    def get_generator(self) -> Generator:
+        return MysqlGenerator(
+            host_settings=f"{self.stats['ServerName']}",
+            databases=self.stats["DatabaseName"],
+        )
+
+
+class MariadbEngine(JdbcEngine):
+    engine_name = "mariadb"
+    settings_node_name = "MySQLSettings"
+    schemas_path_name = 'schemas'
+    tables_path_name = 'tables'
+
+    def get_generator(self) -> Generator:
+        return MysqlGenerator(
+            host_settings=f"{self.stats['ServerName']}",
+            databases=self.stats["DatabaseName"],
+        )
+
+
+class PostgresqlEngine(JdbcEngine):
+    engine_name = "postgres"
+    settings_node_name = "PostgreSQLSettings"
+    schemas_path_name = 'schemas'
+    tables_path_name = 'tables'
+
+    def get_generator(self) -> Generator:
+        return PostgresqlGenerator(
+            host_settings=f"{self.stats['ServerName']}",
+            databases=self.stats["DatabaseName"],
+        )
+
+
 class MssqlEngine(JdbcEngine):
     engine_name = "sqlserver"
     settings_node_name = "MicrosoftSQLServerSettings"
@@ -83,7 +142,11 @@ class S3Engine(EndpointEngine):
         return f"{schema_oddrn}\\{table_name}"
 
 
-engines: List[Type[EndpointEngine]] = [MssqlEngine, S3Engine]
+engines: List[Type[EndpointEngine]] = [
+    MssqlEngine, S3Engine, MysqlEngine,
+    PostgresqlEngine, MariadbEngine, MongodbEngine,
+    ]
+
 engines_factory: Dict[str, Type[EndpointEngine]] = {
     engine.engine_name: engine for engine in engines
 }
