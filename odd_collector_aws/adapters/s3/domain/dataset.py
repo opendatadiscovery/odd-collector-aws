@@ -3,8 +3,16 @@ from typing import Dict, Type
 import pyarrow.dataset as ds
 from odd_collector_aws.adapters.s3.mapper.dataset import map_dataset
 from odd_collector_aws.domain.to_data_entity import ToDataEntity
+from odd_collector_aws.errors import InvalidFileFormatWarning
 from odd_collector_aws.utils import parse_s3_url
 from oddrn_generator.generators import S3Generator
+
+
+def get_dataset_instance(file_path: str):
+    for subclass in S3Dataset.__subclasses__():
+        if file_path.endswith(subclass.supported_formats):
+            return subclass
+    raise InvalidFileFormatWarning(f"Got {file_path}, available formats are {AVAILABLE_FILE_FORMATS}")
 
 
 class S3Dataset(ToDataEntity):
@@ -66,22 +74,17 @@ class S3Dataset(ToDataEntity):
 
 class CSVS3Dataset(S3Dataset):
     format = "csv"
+    supported_formats = (".csv", ".csv.gz", ".csv.bz2")
 
 
 class TSVS3Dataset(S3Dataset):
     format = "tsv"
+    supported_formats = (".tsv", ".tsv.gz", ".tsv.bz2")
 
 
 class ParquetS3Dataset(S3Dataset):
     format = "parquet"
+    supported_formats = (".parquet", )
 
 
-DATASETS_FN: Dict[str, Type[S3Dataset]] = {
-    ".csv": CSVS3Dataset,
-    ".csv.gz": CSVS3Dataset,
-    ".tsv": TSVS3Dataset,
-    ".tsv.gz": TSVS3Dataset,
-    ".parquet": ParquetS3Dataset,
-}
-
-AVAILABLE_FILE_FORMATS = ", ".join(DATASETS_FN.keys())
+AVAILABLE_FILE_FORMATS = ", ".join([", ".join(subclass.supported_formats) for subclass in S3Dataset.__subclasses__()])
