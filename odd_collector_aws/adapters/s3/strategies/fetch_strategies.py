@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from odd_collector_aws.adapters.s3.domain.dataset import get_dataset_instance
+from odd_collector_aws.adapters.s3.domain.dataset import get_dataset_class
 from odd_collector_aws.adapters.s3.file_system import FileSystem
 from odd_collector_aws.adapters.s3.logger import logger
 from odd_collector_aws.adapters.s3.mapper.metadata_extractor import (
@@ -56,22 +56,24 @@ class FolderStrategy(FetchStrategyBase):
 
 
 def create_s3_dataset_for_file(file_path: str, fs: FileSystem):
-    dataset_instance = get_dataset_instance(file_path)
-    dataset = fs.get_dataset(file_path, dataset_instance.format)
+    dataset_class = get_dataset_class(file_path)
+    file_format = dataset_class.get_format()
+    dataset = fs.get_dataset(file_path, file_format)
     logger.debug("extract metadata")
     metadata = FileMetadataExtractor(file_path, dataset, fs).extract()
     logger.debug("Metadata extracted")
-    return dataset_instance(dataset, file_path, metadata)
+    return dataset_class(dataset, file_path, metadata)
 
 
 def create_s3_dataset_for_folder(
     last_file_path: str, folder_path: str, fs: FileSystem, partitioning
 ):
 
-    dataset_instance = get_dataset_instance(last_file_path)
-    dataset = fs.get_dataset(last_file_path, dataset_instance.format)
+    dataset_class = get_dataset_class(last_file_path)
+    file_format = dataset_class.get_format()
+    dataset = fs.get_dataset(last_file_path, file_format)
     metadata = FolderMetadataExtractor(
         last_file_path, dataset, fs, partitioning
     ).extract()
 
-    return dataset_instance(dataset, folder_path, metadata, partitioning)
+    return dataset_class(dataset, folder_path, metadata, partitioning)
