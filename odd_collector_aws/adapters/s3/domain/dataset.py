@@ -1,10 +1,21 @@
-from typing import Dict, Type
+from typing import Dict, Type, Union
 
 import pyarrow.dataset as ds
+from pyarrow._csv import ParseOptions
+from pyarrow._dataset import CsvFileFormat, FileFormat
+
 from odd_collector_aws.adapters.s3.mapper.dataset import map_dataset
 from odd_collector_aws.domain.to_data_entity import ToDataEntity
+from odd_collector_aws.errors import InvalidFileFormatWarning
 from odd_collector_aws.utils import parse_s3_url
 from oddrn_generator.generators import S3Generator
+
+
+def get_dataset_class(file_path: str):
+    for subclass in S3Dataset.__subclasses__():
+        if file_path.endswith(subclass.supported_formats):
+            return subclass
+    raise InvalidFileFormatWarning(f"Got {file_path}, available formats are {AVAILABLE_FILE_FORMATS}")
 
 
 class S3Dataset(ToDataEntity):
@@ -15,11 +26,11 @@ class S3Dataset(ToDataEntity):
     format = None
 
     def __init__(
-        self,
-        dataset: ds.Dataset,
-        path: str,
-        metadata: Dict[str, str],
-        partitioning: str = None,
+            self,
+            dataset: ds.Dataset,
+            path: str,
+            metadata: Dict[str, str],
+            partitioning: str = None,
     ) -> None:
         self._dataset = dataset
         self._path = path
@@ -63,25 +74,31 @@ class S3Dataset(ToDataEntity):
     def to_data_entity(self, oddrn_generator: S3Generator):
         return map_dataset(self, oddrn_generator)
 
+    @classmethod
+    def get_format(cls) -> Union[str, 'FileFormat']:
+        return cls.format
+
 
 class CSVS3Dataset(S3Dataset):
     format = "csv"
+    supported_formats = (".csv", ".csv.gz", ".csv.bz2")
 
 
 class TSVS3Dataset(S3Dataset):
     format = "tsv"
+    supported_formats = (".tsv", ".tsv.gz", ".tsv.bz2")
+
+    @classmethod
+    def get_format(cls) -> 'CsvFileFormat':
+        """
+        Using csv format with 'tab' delimiter for tsv files
+        """
+        return CsvFileFormat(ParseOptions(delimiter='\t'))
 
 
 class ParquetS3Dataset(S3Dataset):
     format = "parquet"
+    supported_formats = (".parquet",)
 
 
-DATASETS_FN: Dict[str, Type[S3Dataset]] = {
-    ".csv": CSVS3Dataset,
-    ".csv.gz": CSVS3Dataset,
-    ".tsv": TSVS3Dataset,
-    ".tsv.gz": TSVS3Dataset,
-    ".parquet": ParquetS3Dataset,
-}
-
-AVAILABLE_FILE_FORMATS = ", ".join(DATASETS_FN.keys())
+AVAILABLE_FILE_FORMATS = ", ".join([", ".join(subclass.supported_formats) for subclass in S3Dataset.__subclasses__()])

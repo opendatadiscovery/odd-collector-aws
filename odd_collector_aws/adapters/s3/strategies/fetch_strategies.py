@@ -1,9 +1,6 @@
 from typing import Any, List
 
-from odd_collector_aws.adapters.s3.domain.dataset import (
-    AVAILABLE_FILE_FORMATS,
-    DATASETS_FN,
-)
+from odd_collector_aws.adapters.s3.domain.dataset import get_dataset_class
 from odd_collector_aws.adapters.s3.file_system import FileSystem
 from odd_collector_aws.adapters.s3.logger import logger
 from odd_collector_aws.adapters.s3.mapper.metadata_extractor import (
@@ -15,7 +12,6 @@ from odd_collector_aws.adapters.s3.strategies.fetch_strategy_base import (
 )
 from odd_collector_aws.domain.dataset_config import DatasetConfig
 from odd_collector_aws.errors import InvalidFileFormatWarning
-from odd_collector_aws.utils import get_file_extension
 
 
 class FileStrategy(FetchStrategyBase):
@@ -60,38 +56,24 @@ class FolderStrategy(FetchStrategyBase):
 
 
 def create_s3_dataset_for_file(file_path: str, fs: FileSystem):
-    file_ext = get_file_extension(file_path)
-    logger.debug("validate")
-    validate_file_extension(file_ext)
-
-    dataset = fs.get_dataset(file_path, DATASETS_FN[file_ext].format)
+    dataset_class = get_dataset_class(file_path)
+    file_format = dataset_class.get_format()
+    dataset = fs.get_dataset(file_path, file_format)
     logger.debug("extract metadata")
     metadata = FileMetadataExtractor(file_path, dataset, fs).extract()
     logger.debug("Metadata extracted")
-    return DATASETS_FN[file_ext](
-        dataset,
-        file_path,
-        metadata,
-    )
+    return dataset_class(dataset, file_path, metadata)
 
 
 def create_s3_dataset_for_folder(
     last_file_path: str, folder_path: str, fs: FileSystem, partitioning
 ):
-    file_ext = get_file_extension(last_file_path)
 
-    validate_file_extension(file_ext)
-
-    dataset = fs.get_dataset(last_file_path, DATASETS_FN[file_ext].format)
+    dataset_class = get_dataset_class(last_file_path)
+    file_format = dataset_class.get_format()
+    dataset = fs.get_dataset(last_file_path, file_format)
     metadata = FolderMetadataExtractor(
         last_file_path, dataset, fs, partitioning
     ).extract()
 
-    return DATASETS_FN[file_ext](dataset, folder_path, metadata, partitioning)
-
-
-def validate_file_extension(file_ext: str):
-    if file_ext not in DATASETS_FN:
-        raise InvalidFileFormatWarning(
-            f"Got {file_ext}, available formats is {AVAILABLE_FILE_FORMATS}"
-        )
+    return dataset_class(dataset, folder_path, metadata, partitioning)
