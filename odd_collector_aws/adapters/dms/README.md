@@ -1,9 +1,9 @@
 
 # AWS Database Migration Service Adapter
 
-The DMS part of ODD provides clear visualization of dataflow if AWS Database Migration Service is being used.
-Each migration of data is showed in the Lineage, which helps with overall understanding of the migration process.
-At the moment supported datasources by ODD Collector for the DMS are:
+The DMS part of ODD provides clear dataflow visualization if AWS Database Migration Service is being used.
+Each data migration is shown in the Lineage, which helps with an overall understanding of the migration process.
+At the moment, supported data sources by ODD Collector for the DMS are:
 
 
 <table>
@@ -58,7 +58,6 @@ At the moment supported datasources by ODD Collector for the DMS are:
 <img src="./images/dms_lineage_ui.png"/>
 
 
-## <a href="https://github.com/opendatadiscovery/odd-collector-aws/blob/dms/config_examples/dms.yaml">Collector config example</a>
-
+## [Collector config example](../../../config_examples/dms.yaml) 
 
 ## For the future Amazon Aurora and Oracle should be implemented.
