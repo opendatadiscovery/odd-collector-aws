@@ -21,7 +21,7 @@ To learn more about collector types and ODD Platform's architecture, [read the d
 | S3                     <a name="s3"></a>                     | [config](config_examples/s3.yaml)                     |
 | Sagemaker              <a name="sagemaker"></a>              | [config](config_examples/sagemaker.yaml)              |
 | SQS                    <a name="sqs"></a>                    | [config](config_examples/sqs.yaml)                    |
-| SagemakerFeaturestore  <a name="sagemaker_featurestore"></a> | [config](config_examples/sagemaker_featurestore.yaml) |
+| SagemakerFeaturestore  <a name="sagemaker-featurestore"></a> | [config](config_examples/sagemaker_featurestore.yaml) |
 
 
 
