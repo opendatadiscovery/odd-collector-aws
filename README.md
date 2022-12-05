@@ -11,17 +11,17 @@ To learn more about collector types and ODD Platform's architecture, [read the d
  - [Docker compose example](#docker-compose-example)
 
 ## Implemented adapters
-| Service               | Config example                                        |
-| --------------------- | ----------------------------------------------------- |
-| Athena                | [config](config_examples/athena.yaml)                 |
-| DynamoDB              | [config](config_examples/dynamodb.yaml)               |
-| Glue                  | [config](config_examples/glue.yaml)                   |
-| Kinesis               | [config](config_examples/kinesis.yaml)                |
-| Quicksight            | [config](config_examples/quicksight.yaml)             |
-| S3                    | [config](config_examples/s3.yaml)                     |
-| Sagemaker             | [config](config_examples/sagemaker.yaml)              |
-| SQS                   | [config](config_examples/sqs.yaml)                    |
-| SagemakerFeaturestore | [config](config_examples/sagemaker_featurestore.yaml) |
+| Service                                                      | Config example                                        |
+|--------------------------------------------------------------|-------------------------------------------------------|
+| Athena                 <a name="athena"></a>                 | [config](config_examples/athena.yaml)                 |
+| DynamoDB               <a name="dynamodb"></a>               | [config](config_examples/dynamodb.yaml)               |
+| Glue                   <a name="glue"></a>                   | [config](config_examples/glue.yaml)                   |
+| Kinesis                <a name="kinesis"></a>                | [config](config_examples/kinesis.yaml)                |
+| Quicksight             <a name="quicksight"></a>             | [config](config_examples/quicksight.yaml)             |
+| S3                     <a name="s3"></a>                     | [config](config_examples/s3.yaml)                     |
+| Sagemaker              <a name="sagemaker"></a>              | [config](config_examples/sagemaker.yaml)              |
+| SQS                    <a name="sqs"></a>                    | [config](config_examples/sqs.yaml)                    |
+| SagemakerFeaturestore  <a name="sagemaker-featurestore"></a> | [config](config_examples/sagemaker_featurestore.yaml) |
 
 
 
