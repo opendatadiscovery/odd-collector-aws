@@ -19,6 +19,10 @@ class GluePlugin(AwsPlugin):
     type: Literal["glue"]
 
 
+class DmsPlugin(AwsPlugin):
+    type: Literal["dms"]
+
+
 class DynamoDbPlugin(AwsPlugin):
     type: Literal["dynamodb"]
     exclude_tables: Optional[List[str]] = []
@@ -59,6 +63,7 @@ class KinesisPlugin(AwsPlugin):
 
 PLUGIN_FACTORY: PluginFactory = {
     "athena": AthenaPlugin,
+    "dms": DmsPlugin,
     "dynamodb": DynamoDbPlugin,
     "glue": GluePlugin,
     "kinesis": KinesisPlugin,

@@ -6,13 +6,15 @@ ODD Collector is a lightweight service which gathers metadata from all your data
 To learn more about collector types and ODD Platform's architecture, [read the documentation](https://docs.opendatadiscovery.org/architecture).
 
 ## Preview
- - [Implemented adapters](#implemented-adapters)
- - [How to build](#building)
- - [Docker compose example](#docker-compose-example)
+- [odd-collector-aws](#odd-collector-aws)
+  - [Preview](#preview)
+  - [Implemented adapters](#implemented-adapters)
+  - [Building](#building)
+  - [Docker compose example](#docker-compose-example)
 
 ## Implemented adapters
 | Service                                                      | Config example                                        |
-|--------------------------------------------------------------|-------------------------------------------------------|
+| ------------------------------------------------------------ | ----------------------------------------------------- |
 | Athena                 <a name="athena"></a>                 | [config](config_examples/athena.yaml)                 |
 | DynamoDB               <a name="dynamodb"></a>               | [config](config_examples/dynamodb.yaml)               |
 | Glue                   <a name="glue"></a>                   | [config](config_examples/glue.yaml)                   |
@@ -22,7 +24,6 @@ To learn more about collector types and ODD Platform's architecture, [read the d
 | Sagemaker              <a name="sagemaker"></a>              | [config](config_examples/sagemaker.yaml)              |
 | SQS                    <a name="sqs"></a>                    | [config](config_examples/sqs.yaml)                    |
 | SagemakerFeaturestore  <a name="sagemaker-featurestore"></a> | [config](config_examples/sagemaker_featurestore.yaml) |
-
 
 
 ## Building
