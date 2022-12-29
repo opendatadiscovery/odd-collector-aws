@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import os
-from os import path
+from pathlib import Path
 
 from odd_collector_sdk.collector import Collector
 
@@ -17,11 +17,11 @@ if __name__ == "__main__":
     try:
         loop = asyncio.get_event_loop()
 
-        cur_dirname = path.dirname(path.realpath(__file__))
-        config_path = path.join(cur_dirname, "../collector_config.yaml")
+        config_path = Path().cwd() / os.getenv("CONFIG_PATH", "collector_config.yaml")
+
         root_package = "odd_collector_aws.adapters"
 
-        collector = Collector(config_path, root_package, PLUGIN_FACTORY)
+        collector = Collector(str(config_path), root_package, PLUGIN_FACTORY)
 
         loop.run_until_complete(collector.register_data_sources())
 
@@ -29,5 +29,5 @@ if __name__ == "__main__":
 
         asyncio.get_event_loop().run_forever()
     except Exception as e:
-        logger.error(e)
+        logger.exception(e)
         asyncio.get_event_loop().stop()
