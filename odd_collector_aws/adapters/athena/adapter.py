@@ -24,11 +24,13 @@ class Adapter(AbstractAdapter):
             "sts",
             aws_access_key_id=config.aws_access_key_id,
             aws_secret_access_key=config.aws_secret_access_key,
+            aws_session_token=config.aws_session_token,
         ).get_caller_identity()["Account"]
         self._athena_client = boto3.client(
             "athena",
             aws_access_key_id=config.aws_access_key_id,
             aws_secret_access_key=config.aws_secret_access_key,
+            aws_session_token=config.aws_session_token,
             region_name=config.aws_region,
         )
         self._oddrn_generator = AthenaGenerator(
