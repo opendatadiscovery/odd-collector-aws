@@ -30,12 +30,14 @@ class Adapter(AbstractAdapter):
             "glue",
             aws_access_key_id=config.aws_access_key_id,
             aws_secret_access_key=config.aws_secret_access_key,
+            aws_session_token=config.aws_session_token,
             region_name=config.aws_region,
         )
         account_id = boto3.client(
             "sts",
             aws_access_key_id=config.aws_access_key_id,
             aws_secret_access_key=config.aws_secret_access_key,
+            aws_session_token=config.aws_session_token,
         ).get_caller_identity()["Account"]
 
         self._oddrn_generator = GlueGenerator(
