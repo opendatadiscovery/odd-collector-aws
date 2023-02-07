@@ -28,6 +28,10 @@ class DynamoDbPlugin(AwsPlugin):
     exclude_tables: Optional[List[str]] = []
 
 
+class EfsPlugin(AwsPlugin):
+    type: Literal["efs"]
+
+
 class AthenaPlugin(AwsPlugin):
     type: Literal["athena"]
 
@@ -72,4 +76,5 @@ PLUGIN_FACTORY: PluginFactory = {
     "sagemaker_featurestore": SagemakerFeaturestorePlugin,
     "sagemaker": SagemakerPlugin,
     "sqs": SQSPlugin,
+    "efs": EfsPlugin
 }
