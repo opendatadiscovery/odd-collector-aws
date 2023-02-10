@@ -1,33 +1,23 @@
-import asyncio
-import logging
-import os
+import traceback
 from pathlib import Path
 
 from odd_collector_sdk.collector import Collector
+from odd_collector_sdk.logger import logger
 
 from odd_collector_aws.domain.plugin import PLUGIN_FACTORY
 
-logging.basicConfig(
-    level=os.getenv("LOGLEVEL", "INFO"),
-    format="[%(asctime)s] %(levelname)s in %(name)s: %(message)s",
-)
-logger = logging.getLogger("odd-collector-aws")
+from .version import print_version
 
 if __name__ == "__main__":
+    print_version()
+
     try:
-        loop = asyncio.get_event_loop()
-
-        config_path = Path().cwd() / os.getenv("CONFIG_PATH", "collector_config.yaml")
-
-        root_package = "odd_collector_aws.adapters"
-
-        collector = Collector(str(config_path), root_package, PLUGIN_FACTORY)
-
-        loop.run_until_complete(collector.register_data_sources())
-
-        collector.start_polling()
-
-        asyncio.get_event_loop().run_forever()
+        collector = Collector(
+            config_path=Path().cwd() / "collector_config.yaml",
+            root_package="odd_collector_aws.adapters",
+            plugin_factory=PLUGIN_FACTORY,
+        )
+        collector.run()
     except Exception as e:
-        logger.exception(e)
-        asyncio.get_event_loop().stop()
+        logger.debug(traceback.format_exc())
+        logger.error(e)
