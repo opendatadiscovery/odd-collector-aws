@@ -3,21 +3,18 @@ from pathlib import Path
 
 from odd_collector_sdk.collector import Collector
 from odd_collector_sdk.logger import logger
-
 from odd_collector_aws.domain.plugin import PLUGIN_FACTORY
 
-from .version import print_version
+COLLECTOR_PACKAGE = __package__
+CONFIG_PATH= Path().cwd() / "collector_config.yaml"
 
-if __name__ == "__main__":
-    print_version()
-
-    try:
-        collector = Collector(
-            config_path=Path().cwd() / "collector_config.yaml",
-            root_package="odd_collector_aws.adapters",
-            plugin_factory=PLUGIN_FACTORY,
-        )
-        collector.run()
-    except Exception as e:
-        logger.debug(traceback.format_exc())
-        logger.error(e)
+try:
+    collector = Collector(
+        config_path=CONFIG_PATH,
+        root_package=COLLECTOR_PACKAGE,
+        plugin_factory=PLUGIN_FACTORY,
+    )
+    collector.run()
+except Exception as e:
+    logger.debug(traceback.format_exc())
+    logger.error(e)

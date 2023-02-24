@@ -17,22 +17,22 @@ pyarrow = "6.0.1"
 humps = "0.2.2"
 flatdict = "4.0.1"
 more-itertools = "8.10.0"
-odd-collector-sdk = "0.3.15"
+odd-collector-sdk = "0.3.16"
 funcy = "1.17"
 lark-parser = "^0.12.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.1.0"
 isort = "^5.12.0"
+pytest = "^7.2.1"
 
 [tool.black]
 target-version = ['py39']
 preview = true
 
-
-[tool.poetry.dev-dependencies]
-pytest = "^7.2.1"
-
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile="black"
