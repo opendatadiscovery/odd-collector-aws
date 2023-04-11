@@ -13,6 +13,8 @@ class AwsPlugin(Plugin):
     aws_session_token: Optional[str]
     aws_account_id: Optional[str]
     endpoint_url: Optional[str]
+    aws_role_arn: Optional[str]
+    aws_role_session_name: Optional[str]
 
 
 class GluePlugin(AwsPlugin):
