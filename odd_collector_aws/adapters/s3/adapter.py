@@ -4,9 +4,11 @@ from odd_collector_aws.domain.plugin import S3Plugin
 from odd_collector_aws.use_cases.s3_dataset_use_case import S3DatasetUseCase
 from odd_collector_aws.use_cases.s3_use_case import S3UseCase
 from odd_collector_aws.utils.create_generator import create_generator
+from odd_collector_aws.utils.handle_nested_structure import HandleNestedStructure
 from odd_collector_sdk.domain.adapter import AbstractAdapter
 from odd_models.models import DataEntityList
 from oddrn_generator.generators import S3Generator
+from funcy import concat, lpluck_attr
 
 from .logger import logger
 
@@ -29,9 +31,14 @@ class Adapter(AbstractAdapter):
         return self._oddrn_generator.get_data_source_oddrn()
 
     def get_data_entity_list(self) -> DataEntityList:
+        entities = list(self._get_entities())
+        list_of_oddrns = lpluck_attr("oddrn", concat(entities))
+        handle_obj = HandleNestedStructure(self.__datasets, list_of_oddrns, self._oddrn_generator)
+        folder_data_entities = handle_obj.get_all_data_entities()
+
         return DataEntityList(
             data_source_oddrn=self.get_data_source_oddrn(),
-            items=list(self._get_entities()),
+            items=entities + folder_data_entities,
         )
 
     def _get_entities(self):
