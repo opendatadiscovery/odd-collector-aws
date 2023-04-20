@@ -8,7 +8,7 @@ from odd_collector_aws.utils.handle_nested_structure import HandleNestedStructur
 from odd_collector_sdk.domain.adapter import AbstractAdapter
 from odd_models.models import DataEntityList
 from oddrn_generator.generators import S3Generator
-from funcy import concat, lpluck_attr
+from funcy import lpluck_attr, lconcat
 
 from .logger import logger
 
@@ -24,6 +24,7 @@ class Adapter(AbstractAdapter):
             dataset_use_case = S3DatasetUseCase(dataset_client)
 
             self.s3_use_case = S3UseCase(dataset_use_case, self._oddrn_generator)
+            self.handle_obj = HandleNestedStructure()
         except Exception:
             logger.debug("Error during initialization adapter", exc_info=True)
 
@@ -31,10 +32,14 @@ class Adapter(AbstractAdapter):
         return self._oddrn_generator.get_data_source_oddrn()
 
     def get_data_entity_list(self) -> DataEntityList:
-        entities = list(self._get_entities())
-        list_of_oddrns = lpluck_attr("oddrn", concat(entities))
-        handle_obj = HandleNestedStructure(self.__datasets, list_of_oddrns, self._oddrn_generator)
-        folder_data_entities = handle_obj.get_all_data_entities()
+        entities = lconcat(self._get_entities())
+        list_of_oddrns = lpluck_attr("oddrn", entities)
+
+        folder_data_entities = self.handle_obj.get_all_data_entities(
+            list(reversed(list_of_oddrns)),
+            self.__datasets,
+            self._oddrn_generator
+        )
 
         return DataEntityList(
             data_source_oddrn=self.get_data_source_oddrn(),

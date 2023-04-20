@@ -3,96 +3,128 @@ from typing import Dict, List
 from funcy import concat, lpluck_attr
 
 from odd_models.models import DataEntity, DataEntityGroup, DataEntityType
+from oddrn_generator.generators import Generator
+from oddrn_generator.utils import unescape, DELIMITER
 
 
 class HandleNestedStructure:
-    def __init__(self, datasets, list_of_oddrns, oddrn_generator):
-        self.datasets = datasets
-        self.list_of_oddrns = list_of_oddrns[::-1]
-        self.oddrn_generator = oddrn_generator
-        self.replaced_oddrn_path = ""
-        self.delimiter = "/"
-        self.backslashes = "\\\\"
 
-    def get_all_data_entities(self) -> List[DataEntity]:
+    def get_all_data_entities(
+            self,
+            list_of_oddrns: List[str],
+            datasets: List,
+            oddrn_generator: Generator
+    ) -> List[DataEntity]:
         """Get all data entity according to datasets."""
         result = []
-        for dataset in self.datasets:
-            result += self.get_data_entity_list(dataset.bucket, dataset.path)
+        for dataset in datasets:
+            result += self.get_data_entity_list(
+                dataset.bucket, dataset.path, oddrn_generator, list_of_oddrns
+            )
         return result
 
-    def get_data_entity_list(self, bucket: str, s3_path: str) -> List[DataEntity]:
+    def get_data_entity_list(
+            self,
+            bucket: str,
+            s3_path: str,
+            oddrn_generator: Generator,
+            list_of_oddrns: List[str]
+    ) -> List[DataEntity]:
         """Get combined list with DataEntity objects."""
-        self.oddrn_generator.set_oddrn_paths(
+        oddrn_generator.set_oddrn_paths(
             buckets=bucket,
             keys=s3_path
         )
-        oddrn_by_path = self.oddrn_generator.get_oddrn_by_path('keys')
-        self.replaced_oddrn_path = oddrn_by_path.replace(self.backslashes, self.delimiter)
-        filtered_list_of_oddrns = list(filter(lambda s: s.startswith(oddrn_by_path), self.list_of_oddrns))
+        oddrn_by_path = oddrn_generator.get_oddrn_by_path('keys')
+        unescaped_oddrn_path = unescape(oddrn_by_path)
+        filtered_list_of_oddrns = list(
+            filter(lambda s: s.startswith(oddrn_by_path), list_of_oddrns)
+        )
         parsed_oddrns = self._parse_oddrns(filtered_list_of_oddrns, s3_path, oddrn_by_path)
-        generated_data_entities = self._generate_data_entity(parsed_oddrns, s3_path)
-        result = self._combine_data_entities(generated_data_entities)
+        generated_data_entities = self._generate_data_entity(
+            parsed_oddrns, s3_path, unescaped_oddrn_path, oddrn_generator
+        )
+        result = self._combine_data_entities(generated_data_entities, unescaped_oddrn_path)
         return result
 
-    def _generate_folder_entity(self, path: str, entities: List[str]):
+    def _generate_folder_entity(self, path: str, entities: List[str], oddrn_generator: Generator):
         """Generate DataEntity by given args."""
         data_entity = DataEntity(
-            oddrn=self.oddrn_generator.get_oddrn_by_path('keys', path),
+            oddrn=oddrn_generator.get_oddrn_by_path('keys', path),
             name=path,
-            type=DataEntityType.DATABASE_SERVICE,
+            type=DataEntityType.FILE,
             data_entity_group=DataEntityGroup(entities_list=entities)
         )
         return data_entity
 
-    def _parse_oddrns(self, oddrns: List[str], s3_path: str, main_oddrn: str) -> Dict[str, List[str]]:
+    def _parse_oddrns(
+            self,
+            oddrns: List[str],
+            s3_path: str,
+            main_oddrn: str
+    ) -> Dict[str, List[str]]:
         """
         Create dictionary from list of created oddrns from files,
         where `key` is path, and `value` is a list of files
         related to the same path.
+        @return {'path_to_folder': ['oddrn_of_file']}
         """
         result = defaultdict(list)
-        second_part_of_oddrn = [i.split(main_oddrn)[-1].replace(self.backslashes, self.delimiter) for i in oddrns]
+        second_part_of_oddrn = [unescape(oddrn.split(main_oddrn)[-1]) for oddrn in oddrns]
         for i in second_part_of_oddrn:
             index = second_part_of_oddrn.index(i)
-            if len(i.split(self.delimiter)) == 1:
+            if len(i.split(DELIMITER)) == 1:
                 result[s3_path].append(oddrns[index])
             else:
-                parent_path, _ = i.rsplit(self.delimiter, 1)
+                parent_path, _ = i.rsplit(DELIMITER, 1)
                 new_path = f"{s3_path}{parent_path}/"
                 result[new_path].append(oddrns[index])
 
         return result
 
-    def _generate_data_entity(self, entities: Dict[str, List[str]], s3_path: str) -> List[DataEntity]:
-        """Create the list of DataEntity objects."""
+    def _generate_data_entity(
+            self,
+            entities: Dict[str, List[str]],
+            s3_path: str,
+            unescaped_oddrn_path: str,
+            oddrn_generator: Generator
+    ) -> List[DataEntity]:
+        """
+        Create the list of DataEntity objects.
+        @param: entities {'path_to_folder': ['oddrn_of_file']}
+        @return: [DataEntity,...,DataEntity]
+        """
         result = []
         previous_path = ''
-        for i in entities:
-            data_entity = entities[i]
-            if i == s3_path:
-                list_of_oddrns = lpluck_attr("oddrn", concat(result))[::-1]
-                extra_data_entities = [x for x in list_of_oddrns if
-                                       x.split(self.replaced_oddrn_path)[1].count(self.delimiter) == 1]
+        for entity in entities:
+            data_entity = entities[entity]
+            if entity == s3_path:
+                list_of_oddrns = list(reversed(lpluck_attr("oddrn", concat(result))))
+                extra_data_entities = [oddrn for oddrn in list_of_oddrns if
+                                       oddrn.split(unescaped_oddrn_path)[1].count(DELIMITER) == 1]
                 data_entity += extra_data_entities
 
-            if i in previous_path:
+            if entity in previous_path:
                 data_entity.append(previous_path)
-            current_entity = self._generate_folder_entity(i, data_entity)
+            current_entity = self._generate_folder_entity(entity, data_entity, oddrn_generator)
             result.append(current_entity)
             previous_path = current_entity.oddrn
 
         return result
 
-    def _combine_data_entities(self, data_entities: List[DataEntity]) -> List[DataEntity]:
+    def _combine_data_entities(
+            self,
+            data_entities: List[DataEntity],
+            unescaped_oddrn_path: str
+    ) -> List[DataEntity]:
         """Combine oddrn from nested folder with parent."""
         oddrns = lpluck_attr("oddrn", concat(data_entities))
         step = 2
         for oddrn in oddrns:
-            if oddrn == self.replaced_oddrn_path:
+            if oddrn == unescaped_oddrn_path:
                 continue
             else:
-                make_path = oddrn.rsplit(self.delimiter, step)[0] + self.delimiter
+                make_path = oddrn.rsplit(DELIMITER, step)[0] + DELIMITER
                 get_index = oddrns.index(make_path)
                 if oddrn not in data_entities[get_index].data_entity_group.entities_list:
                     data_entities[get_index].data_entity_group.entities_list.append(oddrn)
