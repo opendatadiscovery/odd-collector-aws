@@ -16,15 +16,14 @@ pyhumps = "3.0.2"
 pyarrow = "6.0.1"
 humps = "0.2.2"
 flatdict = "4.0.1"
-more-itertools = "8.10.0"
-odd-collector-sdk = "0.3.16"
-funcy = "1.17"
+odd-collector-sdk = "^0.3.27"
 lark-parser = "^0.12.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.1.0"
 isort = "^5.12.0"
 pytest = "^7.2.1"
+pre-commit = "^3.2.2"
 
 [tool.black]
 target-version = ['py39']
