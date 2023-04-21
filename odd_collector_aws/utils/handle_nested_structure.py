@@ -36,15 +36,15 @@ class HandleNestedStructure:
             keys=s3_path
         )
         oddrn_by_path = oddrn_generator.get_oddrn_by_path('keys')
-        unescaped_oddrn_path = unescape(oddrn_by_path)
+        unescaped_oddrn = unescape(oddrn_by_path)
         filtered_list_of_oddrns = list(
             filter(lambda s: s.startswith(oddrn_by_path), list_of_oddrns)
         )
-        parsed_oddrns = self._parse_oddrns(filtered_list_of_oddrns, s3_path, oddrn_by_path)
+        folder_files_map = self._parse_oddrns(filtered_list_of_oddrns, s3_path, oddrn_by_path)
         generated_data_entities = self._generate_data_entity(
-            parsed_oddrns, s3_path, unescaped_oddrn_path, oddrn_generator
+            folder_files_map, s3_path, unescaped_oddrn, oddrn_generator
         )
-        result = self._combine_data_entities(generated_data_entities, unescaped_oddrn_path)
+        result = self._combine_data_entities(generated_data_entities, unescaped_oddrn)
         return result
 
     def _generate_folder_entity(self, path: str, entities: List[str], oddrn_generator: Generator):
@@ -84,9 +84,9 @@ class HandleNestedStructure:
 
     def _generate_data_entity(
             self,
-            entities: Dict[str, List[str]],
+            folder_files_map: Dict[str, List[str]],
             s3_path: str,
-            unescaped_oddrn_path: str,
+            unescaped_oddrn: str,
             oddrn_generator: Generator
     ) -> List[DataEntity]:
         """
@@ -96,32 +96,36 @@ class HandleNestedStructure:
         """
         result = []
         previous_path = ''
-        for entity in entities:
-            data_entity = entities[entity]
-            if entity == s3_path:
+        for folder_path in folder_files_map:
+            oddrn_of_files = folder_files_map[folder_path]
+            if folder_path == s3_path:
                 list_of_oddrns = list(reversed(lpluck_attr("oddrn", concat(result))))
-                extra_data_entities = [oddrn for oddrn in list_of_oddrns if
-                                       oddrn.split(unescaped_oddrn_path)[1].count(DELIMITER) == 1]
-                data_entity += extra_data_entities
+                oddrn_of_sub_folders = [oddrn for oddrn in list_of_oddrns if
+                                        self._has_one_delimiter(oddrn, unescaped_oddrn)]
+                oddrn_of_files += oddrn_of_sub_folders
 
-            if entity in previous_path:
-                data_entity.append(previous_path)
-            current_entity = self._generate_folder_entity(entity, data_entity, oddrn_generator)
+            if folder_path in previous_path:
+                oddrn_of_files.append(previous_path)
+            current_entity = self._generate_folder_entity(folder_path, oddrn_of_files, oddrn_generator)
             result.append(current_entity)
             previous_path = current_entity.oddrn
 
         return result
 
+    def _has_one_delimiter(self, oddrn: str, unescaped_oddrn: str) -> bool:
+        max_counter = 1
+        return oddrn.split(unescaped_oddrn)[1].count(DELIMITER) == max_counter
+
     def _combine_data_entities(
             self,
             data_entities: List[DataEntity],
-            unescaped_oddrn_path: str
+            unescaped_oddrn: str
     ) -> List[DataEntity]:
         """Combine oddrn from nested folder with parent."""
         oddrns = lpluck_attr("oddrn", concat(data_entities))
         step = 2
         for oddrn in oddrns:
-            if oddrn == unescaped_oddrn_path:
+            if oddrn == unescaped_oddrn:
                 continue
             else:
                 make_path = oddrn.rsplit(DELIMITER, step)[0] + DELIMITER
