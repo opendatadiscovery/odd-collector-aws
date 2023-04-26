@@ -19,8 +19,8 @@ class Adapter(AbstractAdapter):
             self.__datasets = config.datasets
 
             self._oddrn_generator = create_generator(S3Generator, config)
-
-            dataset_client = S3DatasetService(S3Client(config))
+            self.s3_client = S3Client(config)
+            dataset_client = S3DatasetService(self.s3_client)
             dataset_use_case = S3DatasetUseCase(dataset_client)
 
             self.s3_use_case = S3UseCase(dataset_use_case, self._oddrn_generator)
@@ -34,11 +34,11 @@ class Adapter(AbstractAdapter):
     def get_data_entity_list(self) -> DataEntityList:
         entities = lconcat(self._get_entities())
         list_of_oddrns = lpluck_attr("oddrn", entities)
-
         folder_data_entities = self.handle_obj.get_all_data_entities(
             list(reversed(list_of_oddrns)),
             self.__datasets,
-            self._oddrn_generator
+            self._oddrn_generator,
+            self.s3_client.s3_folders
         )
 
         return DataEntityList(
