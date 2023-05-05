@@ -17,6 +17,7 @@ class S3Client(S3ClientBase):
 
         self.s3 = AwsClient(config).get_client("s3")
         self.fs = FileSystem(config)
+        self.s3_folders = {}
 
     def get_list_files(self, bucket: str, prefix: str) -> List[S3Object]:
         """
@@ -26,6 +27,7 @@ class S3Client(S3ClientBase):
             objects = self.s3.list_objects_v2(Bucket=bucket, Prefix=prefix.lstrip("/"))[
                 "Contents"
             ]
+            self.s3_folders[prefix] = [e['Key'] for e in objects if not e.get("Size") and e['Key'].endswith('/')]
         except KeyError as e:
             raise EmptyFolderError(f"{bucket}/{prefix}") from e
         else:
