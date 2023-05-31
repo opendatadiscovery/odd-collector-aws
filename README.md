@@ -44,15 +44,22 @@ PLATFORM_HOST_URL=http://odd-platform:8080
 
 Custom `collector-config.yaml`
 ```yaml
-platform_host_url: "http://localhost:8080"
-default_pulling_interval: 10
-token: ""
+platform_host_url: http://localhost:8080
+default_pulling_interval: 10 # Can be omitted to run collector once
+token: "" # Token that must be retrieved from the platform
 plugins:
   - type: s3
-    name: test_s3_adapter
+    name: s3_adapter
+    aws_secret_access_key: <aws_secret_access_key> # Optional.
+    aws_access_key_id: <aws_access_key_id> # Optional.
+    aws_session_token: <aws_session_token> # Optional.
+    aws_region: <aws_region> # Optional.
     datasets:
-      - bucket: bucket_name
-        path: some_data
+      # Recursive fetch for all objects in the bucket.
+      - bucket: my_bucket
+      # Explicitly specify the prefix to file.
+      - bucket: my_other_bucket
+        prefix: folder/subfolder/file.csv
 ```
 
 docker-compose.yaml

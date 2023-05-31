@@ -1,7 +1,6 @@
 # S3 collector-config.yaml example
 # Note: The following example is for AWS S3. For S3 compatible storage, see the example below.
 # All AWS S3 parameters are optional according to default behavior of boto3.
-
 platform_host_url: http://localhost:8080
 default_pulling_interval: 10 # Can be omitted to run collector once
 token: "" # Token that must be retrieved from the platform
