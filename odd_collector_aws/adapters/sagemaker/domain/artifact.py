@@ -1,21 +1,19 @@
 import abc
 from abc import ABC
-from typing import Optional, List
+from typing import List, Optional
 
 import flatdict
+from odd_models import DataTransformer
 from odd_models.models import (
+    DataConsumer,
     DataEntity,
     DataEntityType,
     DataSet,
-    DataConsumer,
     MetadataExtension,
-    DataInput,
 )
 from oddrn_generator import Generator
-from oddrn_generator.utils import escape
+from pydantic import BaseModel
 
-from odd_collector_aws.domain.to_data_entity import ToDataEntity
-from odd_collector_aws.utils import parse_s3_url
 from .base_sagemaker_entity import BaseSagemakerEntity
 
 
@@ -26,7 +24,11 @@ class Association(BaseSagemakerEntity):
     destination_type: str
 
 
-class Artifact(BaseSagemakerEntity, ToDataEntity, ABC):
+class DataAsset(BaseModel):
+    oddrn: str
+
+
+class Artifact(BaseSagemakerEntity, ABC):
     artifact_type: str
     media_type: Optional[str]
     arn: Optional[str]
@@ -55,7 +57,7 @@ class Artifact(BaseSagemakerEntity, ToDataEntity, ABC):
         return [MetadataExtension(schema_url=schema, metadata=flatdict.FlatDict(m))]
 
 
-class DummyDatasetArtifact(Artifact, ToDataEntity):
+class UnknownDatasetArtifact(Artifact):
     def to_data_entity(self, oddrn_generator: Generator) -> DataEntity:
         oddrn = oddrn_generator.get_oddrn_by_path("keys")
         return DataEntity(
@@ -65,7 +67,7 @@ class DummyDatasetArtifact(Artifact, ToDataEntity):
             updated_at=None,
             created_at=None,
             type=DataEntityType.FILE,
-            dataset=DataSet(rows_number=0, field_list=[]),
+            dataset=DataSet(field_list=[]),
         )
 
 
@@ -84,7 +86,7 @@ class Image(Artifact):
             name=self.name,
             type=DataEntityType.MICROSERVICE,
             metadata=self._extract_metadata(),
-            data_input=DataInput(outputs=outputs),
+            data_transformer=DataTransformer(inputs=[], outputs=outputs),
         )
 
 
@@ -109,7 +111,7 @@ class Model(Artifact):
         )
 
 
-def create_image(uri: str):
+def create_image(uri: str) -> Image:
     return Image(
         Name=uri.split("/")[-1],
         Arn=uri,
@@ -118,23 +120,29 @@ def create_image(uri: str):
     )
 
 
-def create_model(uri: str, arn: str):
+def create_model(uri: str, arn: str) -> Model:
     return Model(Name="model", Uri=uri, ArtifactType="Model", Arn=arn)
 
 
-def create_dummy_dataset_artifact(uri: str, arn: str):
-    bucket, key = parse_s3_url(uri)
-    name = escape(key)
-    return DummyDatasetArtifact(Name=name, Uri=uri, Arn=arn, ArtifactType="Dataset")
+# def create_dummy_dataset_artifact(uri: str, arn: str) -> UnknownDatasetArtifact:
+#     bucket, key = parse_s3_url(uri)
+#     name = escape(key)
+#     return UnknownDatasetArtifact(Name=name, Uri=uri, Arn=arn, ArtifactType="Dataset")
 
 
 def as_input(data_entity: DataEntity, trial_component_oddrn: str):
-    if data_entity.type == DataEntityType.MICROSERVICE:
-        if trial_component_oddrn not in data_entity.data_input.outputs:
-            data_entity.data_input.outputs.append(trial_component_oddrn)
+    if (
+        isinstance(data_entity, DataEntity)
+        and data_entity.type == DataEntityType.MICROSERVICE
+    ):
+        if trial_component_oddrn not in data_entity.data_transformer.outputs:
+            data_entity.data_transformer.outputs.append(trial_component_oddrn)
 
 
 def as_output(data_entity: DataEntity, trial_component_oddrn: str):
-    if data_entity.type == DataEntityType.ML_MODEL_TRAINING:
+    if (
+        isinstance(data_entity, DataEntity)
+        and data_entity.type == DataEntityType.ML_MODEL_TRAINING
+    ):
         if trial_component_oddrn not in data_entity.data_consumer.inputs:
             data_entity.data_consumer.inputs.append(trial_component_oddrn)

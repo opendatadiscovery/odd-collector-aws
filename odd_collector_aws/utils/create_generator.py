@@ -1,19 +1,20 @@
 import logging
-from typing import Type
+from typing import Type, TypeVar
 from urllib.parse import urlparse
 
 from botocore.exceptions import ClientError
+from oddrn_generator import Generator
+from oddrn_generator.generators import S3Generator
+
 from odd_collector_aws.aws.aws_client import AwsClient
 from odd_collector_aws.domain.plugin import AwsPlugin
 from odd_collector_aws.errors import AccountIdError
 from odd_collector_aws.utils.s3_compatible_generator import S3CompatibleGenerator
-from oddrn_generator import Generator
-from oddrn_generator.generators import S3Generator
+
+T = TypeVar("T", bound=Generator)
 
 
-def create_generator(
-    generator_cls: Type[Generator], aws_plugin: AwsPlugin
-) -> Generator:
+def create_generator(generator_cls: Type[T], aws_plugin: AwsPlugin) -> T:
     aws_client = AwsClient(aws_plugin)
 
     region = aws_plugin.aws_region

@@ -1,26 +1,24 @@
 from datetime import datetime
-from typing import List
 
 from odd_models.models import (
     DataEntity,
-    DataEntityType,
     DataEntityGroup,
+    DataEntityType,
     MetadataExtension,
 )
 
-from odd_collector_aws.domain.to_data_entity import ToDataEntity
 from .base_sagemaker_entity import BaseSagemakerEntity
 from .source import Source
 from .trial import Trial
 
 
-class Experiment(BaseSagemakerEntity, ToDataEntity):
+class Experiment(BaseSagemakerEntity):
     experiment_arn: str
     experiment_name: str
     source: Source
     creation_time: datetime
     last_modified_time: datetime
-    trials: List[Trial] = []
+    trials: list[Trial] = []
 
     @property
     def arn(self):

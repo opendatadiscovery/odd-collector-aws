@@ -1,9 +1,9 @@
 from typing import List, Literal, Optional
 
 from odd_collector_sdk.domain.plugin import Plugin
+from odd_collector_sdk.types import PluginFactory
 
 from odd_collector_aws.domain.dataset_config import DatasetConfig
-from odd_collector_sdk.types import PluginFactory
 
 
 class AwsPlugin(Plugin):
@@ -38,9 +38,13 @@ class SQSPlugin(AwsPlugin):
 
 class S3Plugin(AwsPlugin):
     type: Literal["s3"]
+    aws_secret_access_key: Optional[str]
+    aws_access_key_id: Optional[str]
+    aws_region: Optional[str]
+    aws_session_token: Optional[str]
+    aws_account_id: Optional[str]
     endpoint_url: Optional[str] = None
-    aws_region: Optional[str] = None
-    datasets: Optional[List[DatasetConfig]] = []
+    datasets: list[DatasetConfig]
 
 
 class QuicksightPlugin(AwsPlugin):
@@ -49,7 +53,12 @@ class QuicksightPlugin(AwsPlugin):
 
 class SagemakerPlugin(AwsPlugin):
     type: Literal["sagemaker"]
-    experiments: Optional[List[str]]
+    aws_secret_access_key: Optional[str]
+    aws_access_key_id: Optional[str]
+    aws_region: Optional[str]
+    aws_session_token: Optional[str]
+    aws_account_id: Optional[str]
+    experiments: Optional[list[str]]
 
 
 class SagemakerFeaturestorePlugin(AwsPlugin):

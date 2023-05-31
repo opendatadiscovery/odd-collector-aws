@@ -1,13 +1,11 @@
 default_pulling_interval: 10
-token: 
+token:
 platform_host_url: "http://localhost:8080"
 plugins:
   - type: s3
     name: s3_adapter
-    aws_secret_access_key:
     aws_access_key_id:
-    aws_region:
-    aws_session_token:
+    aws_secret_access_key:
     datasets:
-      - bucket: bucket_name/
-        path: path/
+      - bucket: my_bucket
+        prefix: prefix

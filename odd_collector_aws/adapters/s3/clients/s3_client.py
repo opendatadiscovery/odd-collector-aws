@@ -1,7 +1,5 @@
-from typing import List
-
-from odd_collector_aws.adapters.s3.file_system import FileSystem
 from odd_collector_aws.adapters.s3.clients.s3_client_base import S3ClientBase, S3Object
+from odd_collector_aws.adapters.s3.file_system import FileSystem
 from odd_collector_aws.aws.aws_client import AwsClient
 from odd_collector_aws.domain.plugin import AwsPlugin
 from odd_collector_aws.errors import EmptyFolderError
@@ -19,7 +17,7 @@ class S3Client(S3ClientBase):
         self.fs = FileSystem(config)
         self.s3_folders = {}
 
-    def get_list_files(self, bucket: str, prefix: str) -> List[S3Object]:
+    def get_list_files(self, bucket: str, prefix: str) -> list[S3Object]:
         """
         List file objects in a bucket. Minio doesn't return folders as objects.
         """
@@ -27,7 +25,12 @@ class S3Client(S3ClientBase):
             objects = self.s3.list_objects_v2(Bucket=bucket, Prefix=prefix.lstrip("/"))[
                 "Contents"
             ]
-            self.s3_folders[prefix] = [e['Key'] for e in objects if not e.get("Size") and e['Key'].endswith('/')]
+
+            self.s3_folders[prefix] = [
+                e["Key"]
+                for e in objects
+                if not e.get("Size") and e["Key"].endswith("/")
+            ]
         except KeyError as e:
             raise EmptyFolderError(f"{bucket}/{prefix}") from e
         else:

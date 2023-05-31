@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, Dict, List, Union, Any
+from typing import Any, Optional, Union
 
 from odd_models.models import (
     DataEntity,
@@ -7,6 +7,7 @@ from odd_models.models import (
     DataTransformer,
     MetadataExtension,
 )
+from oddrn_generator import SagemakerGenerator
 
 from odd_collector_aws.adapters.sagemaker.domain.base_sagemaker_entity import (
     BaseSagemakerEntity,
@@ -14,7 +15,6 @@ from odd_collector_aws.adapters.sagemaker.domain.base_sagemaker_entity import (
 from odd_collector_aws.adapters.sagemaker.domain.source import Source
 from odd_collector_aws.adapters.sagemaker.utils.parse_job_name import parse_job_name
 from odd_collector_aws.const import METADATA_PREFIX
-from odd_collector_aws.domain.to_data_entity import ToDataEntity
 from odd_collector_aws.utils import flatdict
 
 
@@ -57,7 +57,7 @@ class Metric(BaseSagemakerEntity):
     std_dev: float
 
 
-class TrialComponent(BaseSagemakerEntity, ToDataEntity):
+class TrialComponent(BaseSagemakerEntity):
     trial_component_name: str
     trial_component_arn: str
     display_name: str
@@ -69,10 +69,10 @@ class TrialComponent(BaseSagemakerEntity, ToDataEntity):
     last_modified_time: datetime
     created_by: UserInfo
     last_modified_by: UserInfo
-    parameters: Optional[Dict[str, Parameter]]
-    input_artifacts: List[Any]
-    output_artifacts: List[Any]
-    metrics: List[Metric]
+    parameters: Optional[dict[str, Parameter]]
+    input_artifacts: list[Any]
+    output_artifacts: list[Any]
+    metrics: list[Metric]
 
     @property
     def arn(self):
@@ -82,7 +82,16 @@ class TrialComponent(BaseSagemakerEntity, ToDataEntity):
     def name(self):
         return parse_job_name(self.trial_component_name)
 
-    def to_data_entity(self, oddrn_generator, inputs, outputs) -> DataEntity:
+    def to_data_entity(
+        self,
+        oddrn_generator: SagemakerGenerator,
+        inputs: list[str] = None,
+        outputs: list[str] = None,
+    ) -> DataEntity:
+        if inputs is None:
+            inputs = []
+        if outputs is None:
+            outputs = []
         oddrn = oddrn_generator.get_oddrn_by_path("jobs")
         return DataEntity(
             oddrn=oddrn,
@@ -97,7 +106,7 @@ class TrialComponent(BaseSagemakerEntity, ToDataEntity):
             ),
         )
 
-    def __get_parameters_dict(self) -> Dict[str, Union[str, float]]:
+    def __get_parameters_dict(self) -> dict[str, Union[str, float]]:
         return {name: parameter.value for name, parameter in self.parameters.items()}
 
     def __get_metrics(self):
