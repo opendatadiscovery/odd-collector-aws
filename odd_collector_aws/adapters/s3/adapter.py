@@ -10,7 +10,7 @@ from odd_collector_aws.utils.create_generator import create_generator
 
 from .file_system import FileSystem
 from .logger import logger
-from .mapper.batch import map_bucket
+from .mapper.bucket import map_bucket
 
 
 class Adapter(AbstractAdapter):

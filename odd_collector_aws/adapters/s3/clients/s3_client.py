@@ -7,6 +7,7 @@ from odd_collector_aws.errors import EmptyFolderError
 
 class S3Client(S3ClientBase):
     """
+    @deprecated
     Client hides boto3 implementation details.
     """
 
