@@ -9,7 +9,7 @@ class S3FieldTypeTransformer(Transformer):
         return {"type": "struct", "children": items}
 
     def dictionary_type(self, items):
-        return {"type": "dicitionary", "children": items}
+        return {"type": "dictionary", "children": items}
 
     def type(self, items):
         obj = items[0]
@@ -52,3 +52,6 @@ class S3FieldTypeTransformer(Transformer):
             return {"type": "timestamp"}
 
         return {"type": "timestamp", "logical_type": f"timestamp[{items[0].value}]"}
+
+
+field_type_transformer = S3FieldTypeTransformer()

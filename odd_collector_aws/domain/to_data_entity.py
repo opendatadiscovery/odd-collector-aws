@@ -1,13 +1,12 @@
-from abc import ABC, abstractmethod
+from typing import Protocol
 
 from odd_models.models import DataEntity
 
 
-class ToDataEntity(ABC):
+class ToDataEntity(Protocol):
     """
     Interface for models which can be mapped to DataEntity
     """
 
-    @abstractmethod
     def to_data_entity(self, *args, **kwargs) -> DataEntity:
-        raise NotImplementedError
+        ...

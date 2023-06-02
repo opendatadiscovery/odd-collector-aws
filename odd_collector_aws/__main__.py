@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from odd_collector_sdk.collector import Collector
+
 from odd_collector_aws.domain.plugin import PLUGIN_FACTORY
 
 COLLECTOR_PACKAGE = __package__

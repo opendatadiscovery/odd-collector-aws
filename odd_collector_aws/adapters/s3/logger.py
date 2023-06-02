@@ -1,3 +1,1 @@
-import logging
-
-logger = logging.getLogger("s3")
+from odd_collector_sdk.logger import logger

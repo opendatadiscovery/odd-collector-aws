@@ -1,25 +1,40 @@
 # S3 collector-config.yaml example
-platform_host_url: "http://localhost:8080"
-default_pulling_interval: 10
-token: ""
+# Note: The following example is for AWS S3. For S3 compatible storage, see the example below.
+# All AWS S3 parameters are optional according to default behavior of boto3.
+platform_host_url: http://localhost:8080
+default_pulling_interval: 10 # Can be omitted to run collector once
+token: "" # Token that must be retrieved from the platform
 plugins:
   - type: s3
     name: s3_adapter
-    aws_secret_access_key: <aws_secret_access_key>
-    aws_access_key_id: <aws_access_key_id>
-    aws_region: <aws_region>
-    aws_session_token: <aws_session_token>
+    aws_secret_access_key: <aws_secret_access_key> # Optional.
+    aws_access_key_id: <aws_access_key_id> # Optional.
+    aws_session_token: <aws_session_token> # Optional.
+    aws_region: <aws_region> # Optional.
     datasets:
-      - bucket: bucket_name
-        path: folder
-      - bucket: bucket_name
-        path: folder/subfolder/file.csv
-      - bucket: bucket_name"
-        path: folder/
-        partitioning: 'hive'
-        folder_as_dataset: True
+      # Recursive fetch for all objects in the bucket.
+      - bucket: my_bucket
+      # Explicitly specify the prefix to file.
+      - bucket: my_bucket
+        prefix: folder/subfolder/file.csv
+      # When we want to use the folder as a dataset. Very useful for partitioned datasets.
+      # I.e it can be Hive partitioned dataset with structure like this:
+      # s3://my_bucket/partitioned_data/year=2019/month=01/...
+      - bucket: my_bucket
+        prefix: partitioned_data/
+        folder_as_dataset:
+          file_format: parquet
+          flavor: hive
 
-# S3 compatible collector-config.yaml example
+      #field_names must be provided if partition flavor was not used. I.e for structure like this:
+      # s3://my_bucket/partitioned_data/year/...
+      - bucket: my_bucket
+        prefix: partitioned_data/
+        folder_as_dataset:
+          file_format: csv
+          field_names: ['year']
+
+# S3 compatible collector-config.yaml example, for example for Minio we need to specify endpoint_url
 platform_host_url: "http://localhost:8080"
 default_pulling_interval: 10
 token: ""
@@ -31,6 +46,6 @@ plugins:
     aws_access_key_id: <aws_access_key_id>
     aws_region: <aws_region>
     datasets:
-      - bucket: bucket_name
-        path: folder
+      - bucket: my_bucket
+        prefix: partitioned_data
 

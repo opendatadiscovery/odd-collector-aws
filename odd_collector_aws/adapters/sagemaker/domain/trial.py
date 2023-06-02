@@ -1,28 +1,25 @@
 from datetime import datetime
-from typing import List
 
 from odd_models.models import (
     DataEntity,
-    DataEntityType,
     DataEntityGroup,
+    DataEntityType,
     MetadataExtension,
 )
 from pydantic import AnyUrl
 
 from odd_collector_aws.const import METADATA_PREFIX
-from odd_collector_aws.domain.to_data_entity import ToDataEntity
+
 from .base_sagemaker_entity import BaseSagemakerEntity
-from .source import Source
 from .trial_component import TrialComponent
 
 
-class Trial(BaseSagemakerEntity, ToDataEntity):
+class Trial(BaseSagemakerEntity):
     trial_arn: str
     trial_name: str
-    trial_source: Source
     creation_time: datetime
     last_modified_time: datetime
-    trial_components: List[TrialComponent] = []
+    trial_components: list[TrialComponent] = []
 
     @property
     def arn(self):

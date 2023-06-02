@@ -1,21 +1,27 @@
 from typing import Optional
 
-from pydantic import BaseModel, validator
-from funcy import re_test
+from pydantic import BaseModel
+
+
+class FolderAsDataset(BaseModel):
+    """
+    Configuration for folder as dataset.
+    If folder is a dataset, then all files in the folder will be treated as a single dataset.
+    """
+
+    file_format: str
+    flavor: str = None
+    field_names: Optional[list[str]] = None
 
 
 class DatasetConfig(BaseModel):
     bucket: str
-    path: str
-    partitioning: Optional[str] = None
-    folder_as_dataset: bool = False
+    prefix: Optional[str]
+    folder_as_dataset: Optional[FolderAsDataset] = None
 
     @property
     def full_path(self) -> str:
-        return f"{self.bucket}/{self.path.lstrip('/')}"
+        bucket = self.bucket.strip("/")
+        prefix = self.prefix
 
-    @validator("path")
-    def path_must_have_a_key(cls, path: str):
-        if not re_test("\w", path):
-            raise ValueError("must contain at least 1 key")
-        return path
+        return f"{bucket}/{prefix.strip('/')}" if prefix else bucket
