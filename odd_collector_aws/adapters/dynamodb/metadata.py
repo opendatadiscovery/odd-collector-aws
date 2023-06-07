@@ -1,4 +1,4 @@
-from typing import Any, Dict, Set, Callable
+from typing import Any, Callable, Dict, Set
 
 from humps import decamelize
 
@@ -41,11 +41,14 @@ class MetadataExtractor:
                 entries[decamelize(k)] = (
                     self.__extract_all_entries(v, exclude, key_prefix)
                     if isinstance(v, dict)
-                    else [
-                        self.__extract_all_entries(_v, exclude, key_prefix) for _v in v
-                    ]
-                    if isinstance(v, list)
-                    else v
+                    else (
+                        [
+                            self.__extract_all_entries(_v, exclude, key_prefix)
+                            for _v in v
+                        ]
+                        if isinstance(v, list)
+                        else v
+                    )
                 )
 
         return entries

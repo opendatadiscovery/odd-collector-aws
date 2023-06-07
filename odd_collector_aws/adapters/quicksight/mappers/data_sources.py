@@ -1,9 +1,9 @@
-from typing import Dict, Any
+from typing import Any, Dict
 
 from odd_models.models import DataEntity, DataEntityType
+from oddrn_generator import QuicksightGenerator
 
 from . import metadata_extractor
-from oddrn_generator import QuicksightGenerator
 
 
 def map_quicksight_data_sources(

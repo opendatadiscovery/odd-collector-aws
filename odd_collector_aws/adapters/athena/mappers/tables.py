@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Any, Dict
 
 from more_itertools import flatten
 from odd_models.models import DataEntity, DataEntityType, DataSet
@@ -15,7 +15,6 @@ def map_athena_table(
     database_name: str,
     oddrn_generator: AthenaGenerator,
 ) -> DataEntity:
-
     data_entity_type = TABLE_TYPES_SQL_TO_ODD.get(
         raw_table_data["TableType"], DataEntityType.UNKNOWN
     )

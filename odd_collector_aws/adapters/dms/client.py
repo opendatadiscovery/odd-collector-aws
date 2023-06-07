@@ -1,5 +1,5 @@
-from odd_collector_aws.domain.plugin import AwsPlugin
 from odd_collector_aws.aws.aws_client import AwsClient
+from odd_collector_aws.domain.plugin import AwsPlugin
 
 
 class DMSClient:

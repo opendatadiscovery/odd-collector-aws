@@ -2,11 +2,10 @@ from typing import Iterable
 
 import boto3
 import pytz
-from odd_models.models import DataEntity, DataEntityType, DataSet, List
-from odd_models.models import DataEntityList
+from odd_collector_sdk.domain.adapter import AbstractAdapter
+from odd_models.models import DataEntity, DataEntityList, DataEntityType, DataSet, List
 
 from odd_collector_aws.domain.plugin import SagemakerFeaturestorePlugin
-from odd_collector_sdk.domain.adapter import AbstractAdapter
 
 from .mappers.datasets import DatasetMapper
 from .mappers.metadata import metadata_extractor

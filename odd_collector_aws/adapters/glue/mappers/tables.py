@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Any, Dict
 
 from more_itertools import flatten
 from odd_models.models import DataEntity, DataEntityType, DataSet, DataSetField

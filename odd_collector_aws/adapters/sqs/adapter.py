@@ -1,13 +1,16 @@
-from cmath import log
-import boto3
-from botocore.exceptions import ClientError
-from .sqs_generator import SqsGenerator
-from odd_models.models import DataEntityList, DataEntity, DataEntityType
-from odd_collector_sdk.domain.adapter import AbstractAdapter
-from typing import Any, Dict, List
-from odd_collector_aws.domain.plugin import SQSPlugin
 import datetime
+from cmath import log
+from typing import Any, Dict, List
+
+import boto3
 import pytz
+from botocore.exceptions import ClientError
+from odd_collector_sdk.domain.adapter import AbstractAdapter
+from odd_models.models import DataEntity, DataEntityList, DataEntityType
+
+from odd_collector_aws.domain.plugin import SQSPlugin
+
+from .sqs_generator import SqsGenerator
 
 SCHEMA_FILE_URL = (
     "https://raw.githubusercontent.com/opendatadiscovery/opendatadiscovery-specification/"

@@ -1,5 +1,5 @@
 import logging
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 from lark import Lark, LarkError
 from odd_models.models import DataSetField, DataSetFieldType
@@ -58,9 +58,7 @@ def __map_column(
     name = (
         column_name
         if column_name is not None
-        else type_parsed["field_name"]
-        if "field_name" in type_parsed
-        else athena_type
+        else type_parsed["field_name"] if "field_name" in type_parsed else athena_type
     )
 
     resource_name = "keys" if is_key else "values" if is_value else "subcolumns"

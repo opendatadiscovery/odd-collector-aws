@@ -1,11 +1,10 @@
 import json
-from typing import Any, Dict, Set, Callable
+from typing import Any, Callable, Dict, Set
 
 SCHEMA_FILE_URL = "https://raw.githubusercontent.com/opendatadiscovery/"
 
 
 class MetadataExtractor:
-
     # attributes to exclude from metadata
     __data_entity_excludes = {"StreamName"}
 

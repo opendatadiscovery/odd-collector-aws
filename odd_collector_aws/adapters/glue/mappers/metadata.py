@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, Set, Callable
+from typing import Any, Callable, Dict, Set
 
 from humps.main import decamelize
 

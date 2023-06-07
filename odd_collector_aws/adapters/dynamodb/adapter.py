@@ -1,20 +1,20 @@
 from dataclasses import dataclass, field
-from typing import Dict, Union, Callable, Any, Iterable, List
+from typing import Any, Callable, Dict, Iterable, List, Union
 
 import boto3
+from odd_collector_sdk.domain.adapter import AbstractAdapter
 from odd_models.models import (
     DataEntity,
+    DataEntityList,
     DataEntityType,
     DataSet,
     DataSetField,
     DataSetFieldType,
 )
-from odd_models.models import DataEntityList
 from oddrn_generator import DynamodbGenerator
-from odd_collector_sdk.domain.adapter import AbstractAdapter
 
-from odd_collector_aws.domain.plugin import DynamoDbPlugin
 from odd_collector_aws.domain.paginator_config import PaginatorConfig
+from odd_collector_aws.domain.plugin import DynamoDbPlugin
 
 from .metadata import MetadataExtractor
 
@@ -105,8 +105,10 @@ class Adapter(AbstractAdapter):
             )
 
             for entity in sdk_response_payload:
-                yield entity if conf.mapper is None else conf.mapper(
-                    entity, conf.mapper_args
+                yield (
+                    entity
+                    if conf.mapper is None
+                    else conf.mapper(entity, conf.mapper_args)
                 )
 
             if sdk_response.resume_token is None:

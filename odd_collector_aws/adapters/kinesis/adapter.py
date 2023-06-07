@@ -1,9 +1,10 @@
-import boto3
-
 from typing import List
+
+import boto3
 from odd_collector_sdk.domain.adapter import AbstractAdapter
 from odd_models.models import DataEntity, DataEntityList
 from oddrn_generator import KinesisGenerator
+
 from .mappers.streams import map_kinesis_stream
 
 

@@ -1,13 +1,14 @@
+from abc import abstractmethod
+from typing import Any, Dict, List, Type
+
 from oddrn_generator.generators import (
-    MssqlGenerator,
     Generator,
-    S3Generator,
+    MongoGenerator,
+    MssqlGenerator,
     MysqlGenerator,
     PostgresqlGenerator,
-    MongoGenerator,
+    S3Generator,
 )
-from typing import Dict, Any, Type, List
-from abc import abstractmethod
 
 
 class EndpointEngine:
@@ -28,11 +29,15 @@ class EndpointEngine:
         pass
 
     @abstractmethod
-    def get_oddrn_for_table_schema_names(self, generator: Generator, schema_name: str, table_name: str) -> str:
+    def get_oddrn_for_table_schema_names(
+        self, generator: Generator, schema_name: str, table_name: str
+    ) -> str:
         pass
 
     @abstractmethod
-    def extend_schema_oddrn_with_table_name(self, schema_oddrn: str, table_name: str) -> str:
+    def extend_schema_oddrn_with_table_name(
+        self, schema_oddrn: str, table_name: str
+    ) -> str:
         pass
 
 
@@ -45,19 +50,25 @@ class JdbcEngine(EndpointEngine):
         generator.set_oddrn_paths(**{self.schemas_path_name: schema_name})
         return generator.get_oddrn_by_path(self.schemas_path_name)
 
-    def get_oddrn_for_table_schema_names(self, generator: Generator, schema_name: str, table_name: str) -> str:
-        generator.set_oddrn_paths(**{self.schemas_path_name: schema_name, self.tables_path_name: table_name})
+    def get_oddrn_for_table_schema_names(
+        self, generator: Generator, schema_name: str, table_name: str
+    ) -> str:
+        generator.set_oddrn_paths(
+            **{self.schemas_path_name: schema_name, self.tables_path_name: table_name}
+        )
         return generator.get_oddrn_by_path(self.tables_path_name)
 
-    def extend_schema_oddrn_with_table_name(self, schema_oddrn: str, table_name: str) -> str:
+    def extend_schema_oddrn_with_table_name(
+        self, schema_oddrn: str, table_name: str
+    ) -> str:
         return f"{schema_oddrn}/{self.tables_path_name}/{table_name}"
 
 
 class MongodbEngine(JdbcEngine):
     engine_name = "mongodb"
     settings_node_name = "MongoDbSettings"
-    schemas_path_name = 'schemas'
-    tables_path_name = 'collections'
+    schemas_path_name = "schemas"
+    tables_path_name = "collections"
 
     def get_generator(self) -> Generator:
         return MongoGenerator(
@@ -69,8 +80,8 @@ class MongodbEngine(JdbcEngine):
 class MysqlEngine(JdbcEngine):
     engine_name = "mysql"
     settings_node_name = "MySQLSettings"
-    schemas_path_name = 'schemas'
-    tables_path_name = 'tables'
+    schemas_path_name = "schemas"
+    tables_path_name = "tables"
 
     def get_generator(self) -> Generator:
         return MysqlGenerator(
@@ -82,8 +93,8 @@ class MysqlEngine(JdbcEngine):
 class MariadbEngine(JdbcEngine):
     engine_name = "mariadb"
     settings_node_name = "MySQLSettings"
-    schemas_path_name = 'schemas'
-    tables_path_name = 'tables'
+    schemas_path_name = "schemas"
+    tables_path_name = "tables"
 
     def get_generator(self) -> Generator:
         return MysqlGenerator(
@@ -95,8 +106,8 @@ class MariadbEngine(JdbcEngine):
 class PostgresqlEngine(JdbcEngine):
     engine_name = "postgres"
     settings_node_name = "PostgreSQLSettings"
-    schemas_path_name = 'schemas'
-    tables_path_name = 'tables'
+    schemas_path_name = "schemas"
+    tables_path_name = "tables"
 
     def get_generator(self) -> Generator:
         return PostgresqlGenerator(
@@ -108,8 +119,8 @@ class PostgresqlEngine(JdbcEngine):
 class MssqlEngine(JdbcEngine):
     engine_name = "sqlserver"
     settings_node_name = "MicrosoftSQLServerSettings"
-    schemas_path_name = 'schemas'
-    tables_path_name = 'tables'
+    schemas_path_name = "schemas"
+    tables_path_name = "tables"
 
     def get_generator(self) -> Generator:
         return MssqlGenerator(
@@ -135,17 +146,25 @@ class S3Engine(EndpointEngine):
     def get_oddrn_for_schema_name(self, generator: Generator, schema_name: str) -> str:
         return f"{self.source_oddrn}\\{schema_name}"
 
-    def get_oddrn_for_table_schema_names(self, generator: Generator, schema_name: str, table_name: str) -> str:
+    def get_oddrn_for_table_schema_names(
+        self, generator: Generator, schema_name: str, table_name: str
+    ) -> str:
         return f"{self.source_oddrn}\\{schema_name}\\{table_name}"
 
-    def extend_schema_oddrn_with_table_name(self, schema_oddrn: str, table_name: str) -> str:
+    def extend_schema_oddrn_with_table_name(
+        self, schema_oddrn: str, table_name: str
+    ) -> str:
         return f"{schema_oddrn}\\{table_name}"
 
 
 engines: List[Type[EndpointEngine]] = [
-    MssqlEngine, S3Engine, MysqlEngine,
-    PostgresqlEngine, MariadbEngine, MongodbEngine,
-    ]
+    MssqlEngine,
+    S3Engine,
+    MysqlEngine,
+    PostgresqlEngine,
+    MariadbEngine,
+    MongodbEngine,
+]
 
 engines_factory: Dict[str, Type[EndpointEngine]] = {
     engine.engine_name: engine for engine in engines

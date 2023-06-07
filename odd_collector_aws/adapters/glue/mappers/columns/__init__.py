@@ -1,5 +1,5 @@
 import logging
-from typing import List, Tuple, Dict, Any, Iterable
+from typing import Any, Dict, Iterable, List, Tuple
 
 from lark import Lark, LarkError
 from odd_models.models import DataSetField, DataSetFieldType
@@ -60,18 +60,18 @@ def __map_column(
     name = (
         column_name
         if column_name is not None
-        else type_parsed["field_name"]
-        if "field_name" in type_parsed
-        else glue_type
+        else type_parsed["field_name"] if "field_name" in type_parsed else glue_type
     )
 
     resource_name = "keys" if is_key else "values" if is_value else "subcolumns"
 
     dsf = DataSetField(
         name=name,
-        oddrn=oddrn_generator.get_oddrn_by_path("columns", name)
-        if parent_oddrn is None
-        else f"{parent_oddrn}/{resource_name}/{name}",
+        oddrn=(
+            oddrn_generator.get_oddrn_by_path("columns", name)
+            if parent_oddrn is None
+            else f"{parent_oddrn}/{resource_name}/{name}"
+        ),
         parent_field_oddrn=parent_oddrn,
         type=DataSetFieldType(
             type=__map_glue_type(glue_type),
