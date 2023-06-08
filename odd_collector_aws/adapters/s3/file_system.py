@@ -155,5 +155,8 @@ class FileSystem:
 
 def remove_protocol(path: str) -> str:
     if path.startswith("s3://"):
-        path = path[5:]
-    return path
+        return path.removeprefix("s3://")
+    elif path.startswith(("s3a://", "s3n://")):
+        return path[6:]
+    else:
+        return path

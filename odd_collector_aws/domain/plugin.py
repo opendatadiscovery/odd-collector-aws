@@ -46,6 +46,11 @@ class DeltaTableConfig(BaseModel):
     def path(self) -> str:
         return f"{self.scheme}://{self.bucket}/{self.prefix.strip('/')}"
 
+    def append_prefix(self, path: str) -> "DeltaTableConfig":
+        return DeltaTableConfig(
+            schema=self.scheme, bucket=self.bucket, prefix=f"{self.prefix}/{path}"
+        )
+
 
 class S3DeltaPlugin(AwsPlugin):
     type: Literal["s3_delta"]
