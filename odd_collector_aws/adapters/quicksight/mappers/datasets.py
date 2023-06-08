@@ -1,17 +1,17 @@
-from typing import Dict, Any
+from typing import Any, Dict
 
 from more_itertools import flatten
 from odd_models.models import DataEntity, DataEntityType, DataSet, DataTransformer
+from oddrn_generator import (
+    AthenaGenerator,
+    MysqlGenerator,
+    PostgresqlGenerator,
+    QuicksightGenerator,
+    SnowflakeGenerator,
+)
 
 from . import metadata_extractor
 from .columns import map_column
-from oddrn_generator import (
-    QuicksightGenerator,
-    AthenaGenerator,
-    PostgresqlGenerator,
-    MysqlGenerator,
-    SnowflakeGenerator,
-)
 
 
 def map_quicksight_dataset(

@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Any, Dict
 
 from odd_models.models import (
     DataEntity,
@@ -64,9 +64,9 @@ def map_glue_job_run(
             start_time=raw_job_run_data["StartedOn"].isoformat(),
             end_time=raw_job_run_data["CompletedOn"].isoformat(),
             transformer_oddrn=oddrn_generator.get_oddrn_by_path("jobs"),
-            status_reason=raw_job_run_data["ErrorMessage"]
-            if status == "Fail"
-            else None,
+            status_reason=(
+                raw_job_run_data["ErrorMessage"] if status == "Fail" else None
+            ),
             status=status,
         ),
     )

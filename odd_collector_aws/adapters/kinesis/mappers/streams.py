@@ -1,7 +1,8 @@
-from typing import Dict, Any
+from typing import Any, Dict
 
 from odd_models.models import DataEntity, DataEntityType
 from oddrn_generator import KinesisGenerator
+
 from . import metadata_extractor
 
 

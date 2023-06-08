@@ -1,15 +1,14 @@
 from dataclasses import dataclass
-from typing import Dict, Callable, Union, Any, Iterable, Optional, List
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 import boto3
 from more_itertools import flatten
-from odd_models.models import DataEntity
-from odd_models.models import DataEntityList
-from oddrn_generator import AthenaGenerator
 from odd_collector_sdk.domain.adapter import AbstractAdapter
+from odd_models.models import DataEntity, DataEntityList
+from oddrn_generator import AthenaGenerator
 
-from odd_collector_aws.domain.plugin import AthenaPlugin
 from odd_collector_aws.domain.paginator_config import PaginatorConfig
+from odd_collector_aws.domain.plugin import AthenaPlugin
 
 from .mappers.tables import map_athena_table
 
@@ -111,8 +110,10 @@ class Adapter(AbstractAdapter):
             )
 
             for entity in sdk_response.build_full_result()[conf.list_fetch_key]:
-                yield entity if conf.mapper is None else conf.mapper(
-                    entity, conf.mapper_args
+                yield (
+                    entity
+                    if conf.mapper is None
+                    else conf.mapper(entity, conf.mapper_args)
                 )
 
             if sdk_response.resume_token is None:

@@ -2,11 +2,11 @@ import base64
 from typing import Any, Dict
 
 from odd_models.models import (
+    BinaryFieldStat,
     BooleanFieldStat,
     DateTimeFieldStat,
     NumberFieldStat,
     StringFieldStat,
-    BinaryFieldStat,
 )
 
 

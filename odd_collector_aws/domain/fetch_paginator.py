@@ -1,6 +1,8 @@
-from .paginator_config import PaginatorConfig
 from typing import Iterable
+
 from botocore.client import BaseClient
+
+from .paginator_config import PaginatorConfig
 
 
 def fetch_paginator(conf: PaginatorConfig, client: BaseClient) -> Iterable:
@@ -14,8 +16,8 @@ def fetch_paginator(conf: PaginatorConfig, client: BaseClient) -> Iterable:
         )
 
         for entity in sdk_response.build_full_result()[conf.list_fetch_key]:
-            yield entity if conf.mapper is None else conf.mapper(
-                entity, conf.mapper_args
+            yield (
+                entity if conf.mapper is None else conf.mapper(entity, conf.mapper_args)
             )
 
         if sdk_response.resume_token is None:

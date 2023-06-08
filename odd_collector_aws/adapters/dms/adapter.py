@@ -1,10 +1,13 @@
-from typing import Iterable, Dict, Any
+from typing import Any, Dict, Iterable
+
 from odd_collector_sdk.domain.adapter import AbstractAdapter
-from odd_collector_aws.domain.plugin import DmsPlugin
-from oddrn_generator.generators import DmsGenerator
 from odd_models.models import DataEntityList
-from odd_collector_aws.domain.paginator_config import PaginatorConfig
+from oddrn_generator.generators import DmsGenerator
+
 from odd_collector_aws.domain.fetch_paginator import fetch_paginator
+from odd_collector_aws.domain.paginator_config import PaginatorConfig
+from odd_collector_aws.domain.plugin import DmsPlugin
+
 from .client import DMSClient
 from .mappers.tasks import map_dms_task
 
@@ -68,4 +71,7 @@ class Adapter(AbstractAdapter):
 
     def _get_endpoints_nodes_arn_dict(self) -> Dict[str, Any]:
         endpoint_nodes = self._get_endpoints_nodes()
-        return {endpoint_node.get('EndpointArn'): endpoint_node for endpoint_node in endpoint_nodes}
+        return {
+            endpoint_node.get("EndpointArn"): endpoint_node
+            for endpoint_node in endpoint_nodes
+        }

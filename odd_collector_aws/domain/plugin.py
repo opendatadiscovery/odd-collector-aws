@@ -1,7 +1,8 @@
-from typing import List, Literal, Optional
+from typing import Any, List, Literal, Optional
 
 from odd_collector_sdk.domain.plugin import Plugin
 from odd_collector_sdk.types import PluginFactory
+from pydantic import BaseModel, Field
 
 from odd_collector_aws.domain.dataset_config import DatasetConfig
 
@@ -34,6 +35,27 @@ class AthenaPlugin(AwsPlugin):
 
 class SQSPlugin(AwsPlugin):
     type: Literal["sqs"]
+
+
+class DeltaTableConfig(BaseModel):
+    scheme: str = Field(default="s3", alias="schema")
+    bucket: str
+    prefix: str
+
+    @property
+    def path(self) -> str:
+        return f"{self.scheme}://{self.bucket}/{self.prefix.strip('/')}"
+
+
+class S3DeltaPlugin(AwsPlugin):
+    type: Literal["s3_delta"]
+    aws_secret_access_key: Optional[str]
+    aws_access_key_id: Optional[str]
+    aws_region: Optional[str]
+    aws_session_token: Optional[str]
+    endpoint_url: Optional[str]
+    aws_storage_allow_http: Optional[bool] = False
+    delta_tables: list[DeltaTableConfig]
 
 
 class S3Plugin(AwsPlugin):
@@ -81,4 +103,5 @@ PLUGIN_FACTORY: PluginFactory = {
     "sagemaker_featurestore": SagemakerFeaturestorePlugin,
     "sagemaker": SagemakerPlugin,
     "sqs": SQSPlugin,
+    "s3_delta": S3DeltaPlugin,
 }

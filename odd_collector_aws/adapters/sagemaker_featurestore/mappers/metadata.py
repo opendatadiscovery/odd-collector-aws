@@ -1,4 +1,4 @@
-from typing import Any, Dict, Set, Callable, List
+from typing import Any, Callable, Dict, List, Set
 
 from humps import decamelize
 from odd_models.models import MetadataExtension

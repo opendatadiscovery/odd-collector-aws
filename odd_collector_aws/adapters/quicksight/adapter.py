@@ -1,22 +1,20 @@
 import logging
-from typing import Dict, Any, Iterable, List
 from itertools import chain
-
-from odd_collector_aws.domain.plugin import QuicksightPlugin
-from odd_collector_aws.domain.paginator_config import PaginatorConfig
+from typing import Any, Dict, Iterable, List
 
 import boto3
 from more_itertools import flatten
-from odd_models.models import DataEntity
-from odd_models.models import DataEntityList
-
-from oddrn_generator import QuicksightGenerator
 from odd_collector_sdk.domain.adapter import AbstractAdapter
+from odd_models.models import DataEntity, DataEntityList
+from oddrn_generator import QuicksightGenerator
 
-from .mappers.datasets import map_quicksight_dataset
-from .mappers.dashboards import map_quicksight_dashboard
+from odd_collector_aws.domain.paginator_config import PaginatorConfig
+from odd_collector_aws.domain.plugin import QuicksightPlugin
+
 from .mappers.analysis import map_quicksight_analysis
+from .mappers.dashboards import map_quicksight_dashboard
 from .mappers.data_sources import map_quicksight_data_sources
+from .mappers.datasets import map_quicksight_dataset
 
 SDK_DATASET_MAX_RESULTS = 1000
 SDK_DATASET_COL_STATS_MAX_RESULTS = 100
@@ -181,8 +179,10 @@ class Adapter(AbstractAdapter):
             )
 
             for entity in sdk_response.build_full_result()[conf.list_fetch_key]:
-                yield entity if conf.mapper is None else conf.mapper(
-                    entity, conf.mapper_args
+                yield (
+                    entity
+                    if conf.mapper is None
+                    else conf.mapper(entity, conf.mapper_args)
                 )
 
             if sdk_response.resume_token is None:
