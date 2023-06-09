@@ -70,14 +70,18 @@ class DeltaClient:
         except Exception as e:
             raise IsNotDeltaTable() from e
 
-    def handle_folder(self, delta_table_config: DeltaTableConfig) -> Iterable[DTable]:
-        logger.debug(f"Getting delta tables from folder {delta_table_config.path}")
+    def handle_folder(self, config: DeltaTableConfig) -> Iterable[DTable]:
+        logger.debug(f"Getting delta tables from folder {config.path}")
 
-        for object in self.fs.get_file_info(remove_protocol(delta_table_config.path)):
-            if not object.is_file:
-                yield from self.get_table(
-                    delta_table_config.append_prefix(object.base_name)
-                )
+        objects = self.fs.get_file_info(remove_protocol(config.path))
+        allowed = filter(
+            lambda object: not object.is_file and config.allow(object.base_name),
+            objects,
+        )
+
+        for object in allowed:
+            config = config.append_prefix(object.base_name)
+            yield from self.get_table(config)
 
     def get_table(self, delta_table_config: DeltaTableConfig) -> Iterable[DTable]:
         # sourcery skip: raise-specific-error
