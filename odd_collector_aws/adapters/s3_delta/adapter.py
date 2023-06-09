@@ -1,6 +1,6 @@
 from typing import Union
 
-from funcy import lmap, partial
+from funcy import lmap, mapcat, partial
 from odd_collector_sdk.domain.adapter import BaseAdapter
 from odd_models.models import DataEntityList
 from oddrn_generator.generators import Generator, S3Generator
@@ -30,10 +30,10 @@ class Adapter(BaseAdapter):
     def get_data_entity_list(self) -> DataEntityList:
         logger.debug(f"Getting data entity list for {self.config.delta_tables}")
 
-        tables = lmap(self.client.get_table, self.config.delta_tables)
+        tables = mapcat(self.client.get_table, self.config.delta_tables)
         data_entities = lmap(partial(map_delta_table, self.generator), tables)
 
         return DataEntityList(
             data_source_oddrn=self.generator.get_data_source_oddrn(),
-            items=list(data_entities),
+            items=data_entities,
         )

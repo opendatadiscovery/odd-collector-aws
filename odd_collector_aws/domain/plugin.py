@@ -1,5 +1,6 @@
 from typing import Any, List, Literal, Optional
 
+from odd_collector_sdk.domain.filter import Filter
 from odd_collector_sdk.domain.plugin import Plugin
 from odd_collector_sdk.types import PluginFactory
 from pydantic import BaseModel, Field
@@ -41,10 +42,22 @@ class DeltaTableConfig(BaseModel):
     scheme: str = Field(default="s3", alias="schema")
     bucket: str
     prefix: str
+    object_filter: Optional[Filter] = None
 
     @property
     def path(self) -> str:
         return f"{self.scheme}://{self.bucket}/{self.prefix.strip('/')}"
+
+    def append_prefix(self, path: str) -> "DeltaTableConfig":
+        return DeltaTableConfig(
+            schema=self.scheme,
+            bucket=self.bucket,
+            prefix=f"{self.prefix}/{path}",
+            object_filter=self.object_filter,
+        )
+
+    def allow(self, name: str) -> bool:
+        return self.object_filter.is_allowed(name)
 
 
 class S3DeltaPlugin(AwsPlugin):
