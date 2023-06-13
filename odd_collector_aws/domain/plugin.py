@@ -9,12 +9,13 @@ from odd_collector_aws.domain.dataset_config import DatasetConfig
 
 
 class AwsPlugin(Plugin):
-    aws_secret_access_key: str
-    aws_access_key_id: str
-    aws_region: str
+    aws_secret_access_key: Optional[str]
+    aws_access_key_id: Optional[str]
+    aws_region: Optional[str]
     aws_session_token: Optional[str]
     aws_account_id: Optional[str]
     endpoint_url: Optional[str]
+    profile_name: Optional[str]
     aws_role_arn: Optional[str]
     aws_role_session_name: Optional[str]
 
