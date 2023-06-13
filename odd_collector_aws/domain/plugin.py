@@ -1,4 +1,4 @@
-from typing import Any, List, Literal, Optional
+from typing import List, Literal, Optional
 
 from odd_collector_sdk.domain.filter import Filter
 from odd_collector_sdk.domain.plugin import Plugin
@@ -15,6 +15,8 @@ class AwsPlugin(Plugin):
     aws_session_token: Optional[str]
     aws_account_id: Optional[str]
     endpoint_url: Optional[str]
+    aws_role_arn: Optional[str]
+    aws_role_session_name: Optional[str]
 
 
 class GluePlugin(AwsPlugin):
@@ -42,7 +44,7 @@ class DeltaTableConfig(BaseModel):
     scheme: str = Field(default="s3", alias="schema")
     bucket: str
     prefix: str
-    object_filter: Optional[Filter] = None
+    object_filter: Optional[Filter] = Filter()
 
     @property
     def path(self) -> str:
