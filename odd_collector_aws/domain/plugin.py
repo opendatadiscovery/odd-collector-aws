@@ -1,4 +1,4 @@
-from typing import Any, List, Literal, Optional
+from typing import List, Literal, Optional
 
 from odd_collector_sdk.domain.filter import Filter
 from odd_collector_sdk.domain.plugin import Plugin
@@ -42,7 +42,7 @@ class DeltaTableConfig(BaseModel):
     scheme: str = Field(default="s3", alias="schema")
     bucket: str
     prefix: str
-    object_filter: Optional[Filter] = None
+    object_filter: Optional[Filter] = Filter()
 
     @property
     def path(self) -> str:

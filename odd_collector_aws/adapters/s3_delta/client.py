@@ -61,7 +61,7 @@ class DeltaClient:
         self.storage_options: StorageOptions = StorageOptions.from_config(config)
         self.fs = FileSystem(config)
 
-    def load_delta_table(self, delta_table_config: DeltaTableConfig) -> None:
+    def load_delta_table(self, delta_table_config: DeltaTableConfig) -> DeltaTable:
         try:
             return DeltaTable(
                 delta_table_config.path,
@@ -74,14 +74,15 @@ class DeltaClient:
         logger.debug(f"Getting delta tables from folder {config.path}")
 
         objects = self.fs.get_file_info(remove_protocol(config.path))
+
         allowed = filter(
-            lambda object: not object.is_file and config.allow(object.base_name),
+            lambda obj: not obj.is_file and config.allow(obj.base_name),
             objects,
         )
 
-        for object in allowed:
-            config = config.append_prefix(object.base_name)
-            yield from self.get_table(config)
+        for obj in allowed:
+            new_config = config.append_prefix(obj.base_name)
+            yield from self.get_table(new_config)
 
     def get_table(self, delta_table_config: DeltaTableConfig) -> Iterable[DTable]:
         # sourcery skip: raise-specific-error
