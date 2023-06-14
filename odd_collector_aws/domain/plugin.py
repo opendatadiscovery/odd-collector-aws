@@ -9,14 +9,15 @@ from odd_collector_aws.domain.dataset_config import DatasetConfig
 
 
 class AwsPlugin(Plugin):
-    aws_secret_access_key: str
-    aws_access_key_id: str
-    aws_region: str
+    aws_secret_access_key: Optional[str]
+    aws_access_key_id: Optional[str]
+    aws_region: Optional[str]
     aws_session_token: Optional[str]
     aws_account_id: Optional[str]
-    endpoint_url: Optional[str]
+    profile_name: Optional[str]
     aws_role_arn: Optional[str]
     aws_role_session_name: Optional[str]
+    endpoint_url: Optional[str] = None
 
 
 class GluePlugin(AwsPlugin):
@@ -64,10 +65,6 @@ class DeltaTableConfig(BaseModel):
 
 class S3DeltaPlugin(AwsPlugin):
     type: Literal["s3_delta"]
-    aws_secret_access_key: Optional[str]
-    aws_access_key_id: Optional[str]
-    aws_region: Optional[str]
-    aws_session_token: Optional[str]
     endpoint_url: Optional[str]
     aws_storage_allow_http: Optional[bool] = False
     delta_tables: list[DeltaTableConfig]
@@ -75,13 +72,9 @@ class S3DeltaPlugin(AwsPlugin):
 
 class S3Plugin(AwsPlugin):
     type: Literal["s3"]
-    aws_secret_access_key: Optional[str]
-    aws_access_key_id: Optional[str]
-    aws_region: Optional[str]
-    aws_session_token: Optional[str]
-    aws_account_id: Optional[str]
     endpoint_url: Optional[str] = None
     datasets: list[DatasetConfig]
+    filename_filter: Optional[Filter] = Filter()
 
 
 class QuicksightPlugin(AwsPlugin):

@@ -11,6 +11,9 @@ plugins:
     aws_access_key_id: <aws_access_key_id> # Optional.
     aws_session_token: <aws_session_token> # Optional.
     aws_region: <aws_region> # Optional.
+    filename_filter: # Optional. Default filter allows each file to be ingested to platform.
+      include: [ '.*.parquet' ]
+      exclude: [ 'dev_.*' ]
     datasets:
       # Recursive fetch for all objects in the bucket.
       - bucket: my_bucket
@@ -41,10 +44,9 @@ token: ""
 plugins:
   - type: s3
     name: s3_minio_adapter
-    endpoint_url: <some_endpoint>
-    aws_secret_access_key: <aws_secret_access_key>
-    aws_access_key_id: <aws_access_key_id>
-    aws_region: <aws_region>
+    endpoint_url: http://localhost:9000
+    aws_secret_access_key: minioadmin
+    aws_access_key_id: minioadmin
     datasets:
       - bucket: my_bucket
         prefix: partitioned_data

@@ -1,55 +1,23 @@
 from typing import Union
 
-import pyarrow.dataset as ds
-from funcy import iffy, lmap
-from pyarrow._fs import FileInfo, FileSelector
-from pyarrow.fs import S3FileSystem
-
-from odd_collector_aws.domain.plugin import AwsPlugin
+from odd_collector_aws.domain.plugin import S3Plugin
 
 from ...domain.dataset_config import DatasetConfig
+from ...filesystem.pyarrow_fs import FileSystem as PyarrowFs
+from ...utils.remove_s3_protocol import remove_protocol
 from .domain.models import Bucket, File, Folder
 from .logger import logger
 from .utils import file_format
 
 
-class FileSystem:
+class FileSystem(PyarrowFs):
     """
     FileSystem hides pyarrow.fs implementation details.
     """
 
-    def __init__(self, config: AwsPlugin):
-        params = {}
-
-        if config.aws_access_key_id:
-            params["access_key"] = config.aws_access_key_id
-        if config.aws_secret_access_key:
-            params["secret_key"] = config.aws_secret_access_key
-        if config.aws_session_token:
-            params["session_token"] = config.aws_session_token
-        if config.aws_region:
-            params["region"] = config.aws_region
-        if config.endpoint_url:
-            params["endpoint_override"] = config.endpoint_url
-
-        self.fs = S3FileSystem(**params)
-
-    def get_file_info(self, path: str) -> list[FileInfo]:
-        """
-        Get file info from path.
-        @param path: s3 path to file or folder
-        @return: FileInfo
-        """
-        return self.fs.get_file_info(FileSelector(base_dir=path))
-
-    def get_dataset(self, file_path: str, format: str) -> ds.Dataset:
-        """
-        Get dataset from file path.
-        @param file_path:
-        @param format: Should be one of available formats: https://arrow.apache.org/docs/python/api/dataset.html#file-format
-        @return: Dataset
-        """
-        return ds.dataset(source=file_path, filesystem=self.fs, format=format)
+    def __init__(self, config: S3Plugin):
+        self.fs = PyarrowFs(config)
+        self.filename_filter = config.filename_filter
 
     def get_folder_as_file(self, dataset_config: DatasetConfig) -> File:
         """
@@ -59,15 +27,13 @@ class FileSystem:
         """
         logger.debug(f"Getting folder dataset for {dataset_config=}")
 
-        dataset = ds.dataset(
-            source=dataset_config.full_path,
+        dataset = self.get_dataset(
+            path=dataset_config.full_path,
             format=dataset_config.folder_as_dataset.file_format,
-            partitioning=ds.partitioning(
-                flavor=dataset_config.folder_as_dataset.flavor,
-                field_names=dataset_config.folder_as_dataset.field_names,
-            ),
-            filesystem=self.fs,
+            partitioning_flavor=dataset_config.folder_as_dataset.flavor,
+            field_names=dataset_config.folder_as_dataset.field_names,
         )
+
         return File(
             path=dataset_config.full_path,
             base_name=dataset_config.full_path,
@@ -103,14 +69,18 @@ class FileSystem:
         @return: list of either File or Folder
         """
         logger.debug(f"Getting objects for {path=}")
-        return lmap(
-            iffy(
-                lambda x: x.is_file,
-                lambda x: self.get_file(x.path, x.base_name),
-                lambda x: self.get_folder(x.path),
-            ),
-            self.get_file_info(path),
-        )
+        objects = []
+
+        for obj in self.fs.get_file_info(path):
+            if obj.is_file:
+                if not self.filename_filter.is_allowed(obj.base_name):
+                    continue
+
+                objects.append(self.get_file(obj.path, obj.base_name))
+            else:
+                objects.append(self.get_folder(obj.path))
+
+        return objects
 
     def get_file(self, path: str, file_name: str = None) -> File:
         """
@@ -125,7 +95,7 @@ class FileSystem:
 
         try:
             file_fmt = file_format(file_name)
-            dataset = self.get_dataset(path, file_fmt)
+            dataset = self.fs.get_dataset(path, file_fmt)
 
             return File.dataset(
                 path=path,
@@ -146,17 +116,9 @@ class FileSystem:
         """
         Get Folder with objects recursively.
         @param path: s3 path to
+        @param recursive: Flag to recursively search nested objects
         @return: Folder class with objects and path
         """
         path = remove_protocol(path)
         objects = self.list_objects(path) if recursive else []
         return Folder(path, objects)
-
-
-def remove_protocol(path: str) -> str:
-    if path.startswith("s3://"):
-        return path.removeprefix("s3://")
-    elif path.startswith(("s3a://", "s3n://")):
-        return path[6:]
-    else:
-        return path
