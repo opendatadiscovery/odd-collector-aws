@@ -1,4 +1,3 @@
-import datetime
 import traceback as tb
 from dataclasses import asdict, dataclass
 from typing import Any, Iterable, Optional
@@ -9,19 +8,15 @@ from funcy import complement, isnone, last, partial, select_values, silent, walk
 from odd_collector_aws.domain.plugin import DeltaTableConfig, S3DeltaPlugin
 from odd_collector_aws.filesystem.pyarrow_fs import FileSystem
 
+from ...utils.dates import add_utc_timezone, from_ms
+from ...utils.remove_s3_protocol import remove_protocol
 from .logger import logger
 from .models.table import DTable
 
 
-def from_ms(ms) -> datetime.datetime:
-    return datetime.datetime.fromtimestamp(ms / 1000, tz=datetime.timezone.utc)
-
-
-def add_utc_timezone(dt: datetime.datetime) -> datetime.datetime:
-    return dt.replace(tzinfo=datetime.timezone.utc)
-
-
-def handle_values(obj: dict, handler: tuple[str, callable]) -> dict[str, Optional[any]]:
+def handle_values(
+    obj: dict, handler: tuple[str, callable]
+) -> tuple[str, Optional[any]]:
     key, callback = handler
     return key, silent(callback)(obj.get(key))
 
@@ -34,8 +29,10 @@ class StorageOptions:
     aws_secret_access_key: str = None
     aws_region: str = None
     aws_session_token: str = None
-    aws_storage_allow_http: bool = None
+    aws_storage_allow_http: str = None
     endpoint_url: str = None
+    aws_profile: str = None
+    aws_role_session_name: str = None
 
     @classmethod
     def from_config(cls, config: S3DeltaPlugin) -> "StorageOptions":
@@ -44,8 +41,10 @@ class StorageOptions:
             aws_secret_access_key=config.aws_secret_access_key,
             aws_region=config.aws_region or cls.DEFAULT_REGION,
             aws_session_token=config.aws_session_token,
-            aws_storage_allow_http="true" if config.aws_storage_allow_http else None,
             endpoint_url=config.endpoint_url,
+            aws_storage_allow_http="true" if config.aws_storage_allow_http else None,
+            aws_profile=config.profile_name,
+            aws_role_session_name=config.aws_role_session_name,
         )
 
     def to_dict(self) -> dict[str, str]:
@@ -75,10 +74,8 @@ class DeltaClient:
 
         objects = self.fs.get_file_info(remove_protocol(config.path))
 
-        allowed = filter(
-            lambda obj: not obj.is_file and config.allow(obj.base_name),
-            objects,
-        )
+        folders = filter(lambda obj: not obj.is_file, objects)
+        allowed = filter(lambda folder: folder.base_name, folders)
 
         for obj in allowed:
             new_config = config.append_prefix(obj.base_name)
@@ -142,12 +139,3 @@ def get_metadata(table: DeltaTable) -> dict[str, Any]:
         logger.error(f"Failed to get metadata for {table.table_uri}. {e}")
 
     return metadata
-
-
-def remove_protocol(path: str) -> str:
-    if path.startswith("s3://"):
-        return path.removeprefix("s3://")
-    elif path.startswith(("s3a://", "s3n://")):
-        return path[6:]
-    else:
-        return path
