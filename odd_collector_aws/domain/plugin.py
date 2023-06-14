@@ -17,6 +17,7 @@ class AwsPlugin(Plugin):
     profile_name: Optional[str]
     aws_role_arn: Optional[str]
     aws_role_session_name: Optional[str]
+    endpoint_url: Optional[str] = None
 
 
 class GluePlugin(AwsPlugin):
@@ -73,6 +74,7 @@ class S3Plugin(AwsPlugin):
     type: Literal["s3"]
     endpoint_url: Optional[str] = None
     datasets: list[DatasetConfig]
+    filename_filter: Optional[Filter] = Filter()
 
 
 class QuicksightPlugin(AwsPlugin):

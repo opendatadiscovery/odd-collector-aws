@@ -49,6 +49,12 @@ class Aws:
 
         return session
 
+    def get_account_id(self):
+        if self.config.aws_account_id:
+            return self.config.aws_account_id
+        else:
+            return self.create_session().client("sts").get_caller_identity()["Account"]
+
     def get_temporary_credentials(self, session: boto3.Session) -> TempCredentials:
         """
 
@@ -69,8 +75,6 @@ class Aws:
             aws_secret_access_key=temp_credentials["SecretAccessKey"],
             aws_session_token=temp_credentials["SessionToken"],
         )
-
-from logging import logger
 
 
 class AwsClient:
@@ -93,19 +97,18 @@ class AwsClient:
             try:
                 assumed_role_response = self.session.client("sts").assume_role(
                     RoleArn=self._config.aws_role_arn,
-                    RoleSessionName=self._config.aws_role_session_name
+                    RoleSessionName=self._config.aws_role_session_name,
                 )
 
                 if assumed_role_response.Credentials:
-                    self.session = Session(
+                    self.session = boto3.Session(
                         aws_access_key_id=assumed_role_response.Credentials.AccessKeyId,
                         aws_secret_access_key=assumed_role_response.Credentials.SecretAccessKey,
                         aws_session_token=assumed_role_response.Credentials.SessionToken,
-                        region_name=self._config.aws_region
+                        region_name=self._config.aws_region,
                     )
             except Exception:
-                logger.debug(
-                    "Error assuming AWS Role", exc_info=True)
+                logger.debug("Error assuming AWS Role", exc_info=True)
 
     def get_client(self, service_name: str) -> BaseClient:
         return self.session.client(service_name, endpoint_url=self._config.endpoint_url)

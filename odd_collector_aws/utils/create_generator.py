@@ -1,21 +1,19 @@
 import logging
 from typing import Type, TypeVar
-from urllib.parse import urlparse
 
 from botocore.exceptions import ClientError
 from oddrn_generator import Generator
 from oddrn_generator.generators import S3CustomGenerator, S3Generator
 
-from odd_collector_aws.aws.aws_client import AwsClient
+from odd_collector_aws.aws.aws_client import Aws
 from odd_collector_aws.domain.plugin import AwsPlugin
 from odd_collector_aws.errors import AccountIdError
-from odd_collector_aws.utils.s3_compatible_generator import S3CompatibleGenerator
 
 T = TypeVar("T", bound=Generator)
 
 
 def create_generator(generator_cls: Type[T], aws_plugin: AwsPlugin) -> T:
-    aws_client = AwsClient(aws_plugin)
+    aws_client = Aws(aws_plugin)
 
     if generator_cls == S3Generator:
         if aws_plugin.endpoint_url:
@@ -24,7 +22,8 @@ def create_generator(generator_cls: Type[T], aws_plugin: AwsPlugin) -> T:
         return generator_cls()
 
     account_id = aws_plugin.aws_account_id
-    if account_id is None:
+
+    if not account_id:
         try:
             account_id = aws_client.get_account_id()
         except ClientError as e:
