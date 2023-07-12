@@ -10,7 +10,7 @@ from .logger import logger
 from .utils import file_format
 
 
-class FileSystem(PyarrowFs):
+class FileSystem:
     """
     FileSystem hides pyarrow.fs implementation details.
     """
@@ -27,7 +27,7 @@ class FileSystem(PyarrowFs):
         """
         logger.debug(f"Getting folder dataset for {dataset_config=}")
 
-        dataset = self.get_dataset(
+        dataset = self.fs.get_dataset(
             path=dataset_config.full_path,
             format=dataset_config.folder_as_dataset.file_format,
             partitioning_flavor=dataset_config.folder_as_dataset.flavor,
