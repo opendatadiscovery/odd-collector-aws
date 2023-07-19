@@ -10,7 +10,7 @@ from odd_collector_aws.logger import logger
 COLLECTOR_PACKAGE = __package__
 CONFIG_PATH = Path().cwd() / "collector_config.yaml"
 
-logger.info(f"GCP collector version: {get_version()}")
+logger.info(f"AWS collector version: {get_version()}")
 logger.info(f"SDK: {sdk.get_version()}")
 
 collector = Collector(

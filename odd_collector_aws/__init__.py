@@ -7,5 +7,5 @@ def get_version() -> str:
 
         return VERSION
     except Exception as e:
-        logger.warning(f"Can't get version from odd_collector_gcp.__version__. {e}")
+        logger.warning(f"Can't get version from odd_collector_aws.__version__. {e}")
         return "-"
