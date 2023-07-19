@@ -15,7 +15,7 @@ from .models.table import DTable
 
 
 def handle_values(
-    obj: dict, handler: tuple[str, callable]
+        obj: dict, handler: tuple[str, callable]
 ) -> tuple[str, Optional[any]]:
     key, callback = handler
     return key, silent(callback)(obj.get(key))
@@ -76,8 +76,9 @@ class DeltaClient:
 
         folders = filter(lambda obj: not obj.is_file, objects)
         allowed = filter(lambda folder: folder.base_name, folders)
+        filtered = filter(lambda item: config.allow(item.path), allowed)
 
-        for obj in allowed:
+        for obj in filtered:
             new_config = config.append_prefix(obj.base_name)
             yield from self.get_table(new_config)
 
