@@ -3,7 +3,7 @@ from typing import List, Literal, Optional
 from odd_collector_sdk.domain.filter import Filter
 from odd_collector_sdk.domain.plugin import Plugin
 from odd_collector_sdk.types import PluginFactory
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 from odd_collector_aws.domain.dataset_config import DatasetConfig
 
@@ -73,8 +73,15 @@ class S3DeltaPlugin(AwsPlugin):
 class S3Plugin(AwsPlugin):
     type: Literal["s3"]
     endpoint_url: Optional[str] = None
-    datasets: list[DatasetConfig]
+    datasets: Optional[list[DatasetConfig]] = None
+    dataset_config: DatasetConfig
     filename_filter: Optional[Filter] = Filter()
+
+    @validator("datasets", pre=True)
+    def validate_datasets(cls, v):
+        if v:
+            raise ValueError("datasets field is deprecated, use dataset_config instead")
+
 
 
 class QuicksightPlugin(AwsPlugin):
