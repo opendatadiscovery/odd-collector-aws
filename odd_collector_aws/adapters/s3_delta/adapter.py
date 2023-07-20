@@ -13,7 +13,6 @@ from .logger import logger
 from .mappers.delta_table import map_delta_table
 
 # TODO: Add tags
-# TODO: Complex types types
 
 
 class Adapter(BaseAdapter):

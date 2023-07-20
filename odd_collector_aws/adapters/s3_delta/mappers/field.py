@@ -1,60 +1,38 @@
-from deltalake._internal import ArrayType, Field, MapType, PrimitiveType, StructType
-from odd_models.models import DataSetField, DataSetFieldType, Type
+from pathlib import Path
+from odd_collector_sdk.grammar_parser.build_dataset_field import DatasetFieldBuilder
+from odd_models.models import DataSetField, Type
 from oddrn_generator import S3Generator
+from ..models.field import DField
 
-from ..logger import logger
-
-DELTA_TO_ODD_TYPE_MAP = {
+DELTA_TO_ODD_TYPE_MAP: dict[str, Type] = {
+    "float": Type.TYPE_NUMBER,
+    "struct": Type.TYPE_STRUCT,
+    "bigint": Type.TYPE_INTEGER,
+    "binary": Type.TYPE_BINARY,
+    "boolean": Type.TYPE_BOOLEAN,
+    "date": Type.TYPE_DATETIME,
+    "decimal": Type.TYPE_NUMBER,
+    "double": Type.TYPE_NUMBER,
+    "void": Type.TYPE_UNKNOWN,
+    "smallint": Type.TYPE_INTEGER,
+    "timestamp": Type.TYPE_TIME,
+    "tinyint": Type.TYPE_INTEGER,
+    "array": Type.TYPE_LIST,
+    "map": Type.TYPE_MAP,
+    "int": Type.TYPE_INTEGER,
+    "long": Type.TYPE_INTEGER,
     "string": Type.TYPE_STRING,
+    "interval": Type.TYPE_DURATION,
 }
 
 
-def map_to_odd_type(delta_type: str) -> Type:
-    return DELTA_TO_ODD_TYPE_MAP.get(delta_type, Type.TYPE_UNKNOWN)
-
-
-def unknown_field(generator: S3Generator, field: Field) -> DataSetField:
-    generator.set_oddrn_paths(columns=field.name)
-    return DataSetField(
-        oddrn=generator.get_oddrn_by_path("columns"),
-        name=field.name,
-        type=DataSetFieldType(
-            type=Type.TYPE_UNKNOWN,
-            logical_type=field.type,
-            is_nullable=field.nullable,
-        ),
+def map_field(oddrn_generator: S3Generator, column: DField) -> list[DataSetField]:
+    field_builder = DatasetFieldBuilder(
+        data_source="s3_delta",
+        oddrn_generator=oddrn_generator,
+        parser_config_path=Path(
+            "odd_collector_aws/adapters/s3_delta/mappers/grammar/field_types.lark"
+        ).absolute(),
+        odd_types_map=DELTA_TO_ODD_TYPE_MAP,
     )
-
-
-def map_primitive(generator: S3Generator, field: Field) -> DataSetField:
-    generator.set_oddrn_paths(columns=field.name)
-    return DataSetField(
-        oddrn=generator.get_oddrn_by_path("columns"),
-        name=field.name,
-        type=DataSetFieldType(
-            type=map_to_odd_type(field.type.type),
-            logical_type=field.type.type,
-            is_nullable=field.nullable,
-        ),
-    )
-
-
-def map_map(generator: S3Generator, field: Field) -> DataSetField:
-    ...
-
-
-def map_struct(generator: S3Generator, field: Field) -> DataSetField:
-    ...
-
-
-def map_array(generator: S3Generator, field: Field) -> DataSetField:
-    ...
-
-
-def map_field(generator: S3Generator, field: Field) -> DataSetField:
-    type_ = field.type
-
-    if isinstance(type_, PrimitiveType):
-        return map_primitive(generator, field)
-    else:
-        logger.error(f"Unknown field type: {field.type}")
+    return field_builder.build_dataset_field(column)

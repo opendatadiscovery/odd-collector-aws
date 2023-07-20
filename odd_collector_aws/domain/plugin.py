@@ -45,7 +45,7 @@ class DeltaTableConfig(BaseModel):
     scheme: str = Field(default="s3", alias="schema")
     bucket: str
     prefix: str
-    object_filter: Optional[Filter] = Filter()
+    filter: Optional[Filter] = Filter()
 
     @property
     def path(self) -> str:
@@ -56,11 +56,11 @@ class DeltaTableConfig(BaseModel):
             schema=self.scheme,
             bucket=self.bucket,
             prefix=f"{self.prefix}/{path}",
-            object_filter=self.object_filter,
+            filter=self.filter,
         )
 
     def allow(self, name: str) -> bool:
-        return self.object_filter.is_allowed(name)
+        return self.filter.is_allowed(name)
 
 
 class S3DeltaPlugin(AwsPlugin):
